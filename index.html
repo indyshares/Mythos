@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Mythos - Cloud Knowledge & Writing Workspace</title>
+    <meta name="description" content="Cloud-based Knowledge Management & Writing Workspace with hierarchical file system, Markdown live editor, internal links, graph, story timeline, and multi-provider AI Knowledge Assistant with read-only retrieval." />
+    <meta property="og:title" content="Mythos - Cloud Knowledge & Writing Workspace" />
+    <meta property="og:description" content="Cloud-based Knowledge Management & Writing Workspace with hierarchical file system, Markdown live editor, internal links, graph, story timeline, and multi-provider AI Knowledge Assistant with read-only retrieval." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    
+    <!-- PWA Meta and Icons -->
+    <meta name="theme-color" content="#090d16" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mythos" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet" />
+    <script>
+      // Suppress harmless Vite HMR WebSocket disconnect messages in container preview
+      window.addEventListener('error', function(event) {
+        if (event && (event.message?.includes('WebSocket closed without opened') || (event.message?.includes('WebSocket') && event.filename?.includes('@vite/client')))) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+          return true;
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = event && (event.reason?.message || event.reason || '');
+        if (typeof reason === 'string' && (reason.includes('WebSocket closed without opened') || reason.includes('WebSocket'))) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      });
+    </script>
+  </head>
+  <body class="bg-neutral-900 text-neutral-100 antialiased selection:bg-sky-500/20 selection:text-sky-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

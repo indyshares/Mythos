@@ -1,0 +1,17 @@
+{
+  "sessions": [
+    {
+      "id": "s1",
+      "title": "Test Session",
+      "messages": []
+    }
+  ],
+  "contexts": {
+    "ws-dust-of-sorcery": {
+      "manualContextIds": [],
+      "instructions": "Be precise",
+      "updatedAt": "2026-10-31T15:12:31.360Z"
+    }
+  },
+  "lastSyncedAt": "2026-10-31T15:12:31.360Z"
+}

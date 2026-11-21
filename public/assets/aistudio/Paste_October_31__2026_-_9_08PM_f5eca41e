@@ -1,0 +1,2895 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD)
+# Cloud-based Knowledge & Writing Workspace
+
+**Document Type:** Product Requirements Document  
+**Version:** 1.0  
+**Status:** Draft – Product Definition  
+**Product Category:** Cloud-based Knowledge Management & Writing Workspace  
+**Infrastructure:** Cloudflare  
+**Primary Platform:** Web Application (Responsive / Mobile-first)  
+**AI Architecture:** Multi-provider, Read-only Knowledge Assistant
+
+---
+
+# 1. PRODUCT OVERVIEW
+
+## 1.1 Product Vision
+
+สร้างแพลตฟอร์ม Cloud-based Knowledge & Writing Workspace ที่รวมความสามารถของ Note-taking Application, Markdown Editor, File Management, Knowledge Management และ AI Knowledge Assistant เข้าไว้ในระบบเดียว
+
+แพลตฟอร์มนี้ได้รับแรงบันดาลใจจากแนวคิดการทำงานของ Obsidian โดยนำเสนอประสบการณ์การจัดการไฟล์และความรู้ในรูปแบบที่ยืดหยุ่น สามารถจัดเก็บข้อมูลเป็นไฟล์ Markdown เชื่อมโยงข้อมูลระหว่างกัน และใช้ AI วิเคราะห์องค์ความรู้ภายในพื้นที่ทำงานได้
+
+เป้าหมายไม่ใช่เพียงการสร้างแอปจดบันทึก แต่เป็นการสร้างพื้นที่ทำงานที่ผู้ใช้สามารถสร้าง จัดเก็บ จัดระเบียบ เชื่อมโยง ค้นหา และนำข้อมูลไปใช้ต่อได้อย่างเป็นระบบ
+
+## 1.2 Core Concept
+
+ผลิตภัณฑ์ประกอบด้วยองค์ประกอบหลัก 4 ส่วน
+
+1. Workspace & File System
+   - พื้นที่ทำงานส่วนตัว
+   - File Explorer
+   - Folder และ Subfolder
+   - File Management
+   - Cloud Storage
+
+2. Knowledge & Writing System
+   - Markdown Editor
+   - Notes
+   - Knowledge Base
+   - Worldbuilding
+   - Story Planning
+   - Timeline
+   - Internal Links และ Backlinks
+
+3. AI Knowledge Assistant
+   - AI Chat
+   - AI Knowledge Retrieval
+   - Context-aware Analysis
+   - Workspace Instructions
+   - Source Citations
+   - Read-only Access
+
+4. Cloud Infrastructure
+   - Cloudflare Workers
+   - Cloudflare D1
+   - Cloudflare R2
+   - Cloudflare KV
+   - Optional Cloudflare Vectorize
+   - Secure API Gateway
+
+## 1.3 Product Philosophy
+
+หลักการออกแบบผลิตภัณฑ์:
+
+- User Ownership: ผู้ใช้เป็นเจ้าของข้อมูล
+- Workspace Isolation: ข้อมูลแต่ละ Workspace ต้องแยกจากกัน
+- Flexible Organization: ผู้ใช้จัดโครงสร้างไฟล์ได้อย่างอิสระ
+- Cloud-first: ข้อมูลหลักจัดเก็บบน Cloud
+- Markdown-first: ใช้ Markdown เป็นรูปแบบเนื้อหาหลัก
+- Model Agnostic: ไม่ผูกติดกับ AI Provider รายเดียว
+- AI Read-only: AI มีสิทธิ์อ่านและวิเคราะห์เท่านั้น
+- Mobile-first: ออกแบบจาก Mobile แล้วขยายสู่ Desktop
+- Non-destructive: การจัดการข้อมูลต้องลดความเสี่ยงต่อการสูญหาย
+- Simple but Powerful: ความสามารถสูงโดยไม่เพิ่มภาระการจัดการให้ผู้ใช้
+
+## 1.4 Target Users
+
+กลุ่มผู้ใช้หลัก:
+
+1. Writers & Authors
+   - นักเขียนนิยาย
+   - นักเขียนบทความ
+   - นักเขียนงานวิชาการ
+   - นักเขียนบทภาพยนตร์
+
+2. Knowledge Workers
+   - ผู้จัดการความรู้ส่วนตัว
+   - นักวิจัย
+   - นักศึกษา
+   - ผู้ที่ต้องการจัดการข้อมูลจำนวนมาก
+
+3. Creators
+   - Content Creators
+   - Scriptwriters
+   - Creative Professionals
+
+4. Project-oriented Users
+   - ผู้จัดการโปรเจกต์
+   - นักพัฒนาซอฟต์แวร์
+   - ผู้ที่ต้องการเก็บข้อมูลและเอกสารแยกตามโครงการ
+
+## 1.5 Key Value Proposition
+
+- จัดเก็บข้อมูลเป็นระบบใน Workspace เดียว
+- จัดโครงสร้าง Folder ได้อย่างอิสระ
+- ใช้งาน Markdown ได้อย่างมีประสิทธิภาพ
+- เชื่อมโยงข้อมูลระหว่างไฟล์
+- ใช้ AI เข้าใจข้อมูลใน Workspace ปัจจุบัน
+- เปลี่ยน AI Provider และ Model ได้
+- ใช้งานได้ทั้ง Desktop และ Mobile
+- ข้อมูลไม่ถูกผูกติดกับ AI หรือผู้ให้บริการรายใดรายหนึ่ง
+
+---
+
+# 2. PRODUCT SCOPE
+
+## 2.1 In Scope
+
+ระบบที่อยู่ในขอบเขตการพัฒนา:
+
+- Authentication
+- Workspace Management
+- File Explorer
+- Folder Management
+- File Management
+- Move Operations
+- Markdown Editor
+- Auto Save
+- Internal Links
+- Backlinks
+- Tags
+- Properties / YAML Frontmatter
+- Search
+- Quick Switcher
+- Tabs
+- Knowledge Management
+- Notes Management
+- Timeline
+- Story Planning
+- AI Provider Management
+- AI Model Management
+- AI Assistant
+- Workspace Instructions
+- AI Read-only Retrieval
+- Chat History
+- Cloud Storage
+- Responsive UI
+- Dark / Light Theme
+- Import / Export
+- Trash / Recovery
+- Version History
+
+## 2.2 Out of Scope – Initial Release
+
+ความสามารถที่ไม่จำเป็นต้องอยู่ใน MVP:
+
+- Real-time collaborative editing
+- Multi-user shared Workspace
+- Public publishing platform
+- Native Desktop Application
+- Native iOS / Android Application
+- Offline-first synchronization
+- Advanced Graph Visualization
+- Automated AI File Editing
+- AI-generated File Creation
+- AI-generated Workspace Organization
+- Advanced Semantic Search
+- Plugin Marketplace
+- Third-party Extension Marketplace
+
+ความสามารถเหล่านี้สามารถพัฒนาในระยะต่อไปได้
+
+---
+
+# 3. SYSTEM TERMINOLOGY
+
+ระบบต้องใช้คำศัพท์ให้สอดคล้องกันทั้ง Frontend, Backend, Database และ Documentation
+
+| Term | Definition |
+|---|---|
+| User | ผู้ใช้งานระบบ |
+| Workspace | พื้นที่ทำงานหลักของผู้ใช้ |
+| Vault | คำเรียกเดิมของ Workspace ซึ่งใช้แทนกันในแนวคิดเดิม |
+| Root | ตำแหน่งรากของ Workspace |
+| Folder | โฟลเดอร์ภายใน Workspace |
+| Subfolder | โฟลเดอร์ย่อย |
+| File | ไฟล์ข้อมูล |
+| Note | ไฟล์บันทึก |
+| Editor | พื้นที่แก้ไขเนื้อหา |
+| Knowledge Base | พื้นที่จัดเก็บข้อมูลความรู้ |
+| AI Provider | ผู้ให้บริการ AI |
+| AI Model | โมเดลที่ใช้งานจาก Provider |
+| Workspace Instructions | คำสั่งเฉพาะ Workspace สำหรับ AI |
+| AI Session | บทสนทนากับ AI |
+| Retrieval | กระบวนการค้นหาและดึงข้อมูล |
+| Backlink | ลิงก์จากไฟล์อื่นที่อ้างถึงไฟล์ปัจจุบัน |
+
+**ข้อกำหนดสำคัญ:** ในผลิตภัณฑ์ให้ใช้คำว่า Workspace เป็นคำหลัก ส่วนคำว่า Vault อาจใช้ในระดับ Technical Documentation หรือระบบภายในได้ แต่ต้องไม่ทำให้ผู้ใช้เข้าใจว่าเป็นคนละสิ่งกัน
+
+---
+
+# 4. INFORMATION ARCHITECTURE
+
+## 4.1 Workspace Architecture
+
+Workspace คือพื้นที่ทำงานหลักของผู้ใช้หนึ่งชุด
+
+ผู้ใช้สามารถสร้าง Workspace ได้หลายรายการ โดยแต่ละ Workspace มีข้อมูลและการตั้งค่าแยกจากกัน
+
+ตัวอย่าง:
+
+```text
+USER
+│
+├── Workspace: ธุลีมนตรา
+│   ├── File System
+│   ├── Knowledge Base
+│   ├── Manuscript
+│   ├── Workspace Instructions
+│   ├── AI Sessions
+│   └── Workspace Settings
+│
+├── Workspace: Personal Knowledge
+│   ├── File System
+│   ├── Notes
+│   ├── Research
+│   └── AI Sessions
+│
+└── Workspace: Project Alpha
+    ├── File System
+    ├── Documentation
+    └── AI Sessions
+```
+
+### Workspace Requirements
+
+- ผู้ใช้สร้าง Workspace ได้
+- ผู้ใช้เปลี่ยนชื่อ Workspace ได้
+- ผู้ใช้ตั้งค่ารายละเอียด Workspace ได้
+- ผู้ใช้ลบ Workspace ได้ โดยต้องมีขั้นตอนยืนยัน
+- แต่ละ Workspace มี File System แยกกัน
+- แต่ละ Workspace มี AI Instructions แยกกัน
+- แต่ละ Workspace มี AI Sessions แยกกัน
+- AI ต้องไม่สามารถเข้าถึงข้อมูล Workspace อื่น
+- Workspace ต้องมี ID ที่ไม่ซ้ำกัน
+- Workspace ต้องมี Owner ID
+- การเปลี่ยน Workspace ต้องเปลี่ยน Context ของระบบอย่างสมบูรณ์
+
+## 4.2 File System Architecture
+
+ระบบใช้โครงสร้าง Tree-based File System
+
+ผู้ใช้มีอิสระในการสร้าง Folder, Subfolder และ File โดยไม่จำเป็นต้องใช้โครงสร้างที่ระบบกำหนดไว้
+
+ตัวอย่าง:
+
+```text
+WORKSPACE
+│
+└── /
+    │
+    ├── Characters/
+    │   ├── Lucia.md
+    │   └── Lysander.md
+    │
+    ├── Worldbuilding/
+    │   ├── Geography/
+    │   ├── History/
+    │   ├── Cultures/
+    │   └── Magic System/
+    │
+    ├── Notes/
+    │   ├── Inbox/
+    │   └── Journal/
+    │
+    ├── Story Planning/
+    │   ├── Timeline/
+    │   ├── Events/
+    │   └── Chapters/
+    │
+    └── Manuscript/
+        ├── Book 01/
+        └── Book 02/
+```
+
+โครงสร้างข้างต้นเป็นเพียงตัวอย่าง ผู้ใช้สามารถสร้าง เปลี่ยนชื่อ ย้าย หรือลบโฟลเดอร์ได้ตามต้องการ
+
+## 4.3 Root Directory
+
+Root คือระดับบนสุดของ Workspace
+
+แสดงด้วยเครื่องหมาย `/`
+
+ข้อกำหนด:
+
+- ทุก Workspace ต้องมี Root
+- Root ไม่ใช่ Folder ที่ผู้ใช้สร้างขึ้นเอง
+- Root ไม่สามารถลบได้
+- Root ไม่สามารถย้ายได้
+- สามารถย้าย File จาก Folder กลับ Root ได้
+- สามารถย้าย Folder จาก Subfolder กลับ Root ได้
+- สามารถสร้าง Folder และ File ใน Root ได้
+- สามารถใช้ Root เป็นปลายทางของ Move Operation ได้
+- รายการที่มี parent_id = NULL ถือว่าอยู่ใน Root
+
+---
+
+# 5. WORKSPACE MANAGEMENT
+
+## 5.1 Workspace Dashboard
+
+หน้าหลักของ Workspace ควรแสดง:
+
+- Workspace Name
+- Workspace Description
+- Recent Files
+- Recent Notes
+- Recently Modified
+- Quick Actions
+- Favorite Files
+- Pinned Folders
+- AI Assistant Access
+- Storage Usage
+- Workspace Activity
+
+## 5.2 Workspace Settings
+
+การตั้งค่าระดับ Workspace ประกอบด้วย:
+
+1. General
+   - Workspace Name
+   - Description
+   - Icon
+   - Created Date
+
+2. Appearance
+   - Theme
+   - Accent Color
+   - Editor Preferences
+   - Font Settings
+
+3. Editor
+   - Default Editor Mode
+   - Auto Save
+   - Word Count
+   - Markdown Preferences
+
+4. AI
+   - Workspace Instructions
+   - Default Provider
+   - Default Model
+   - AI Permissions
+   - Retrieval Settings
+
+5. Storage
+   - Storage Usage
+   - File Count
+   - Attachment Count
+   - Trash
+
+6. Data Management
+   - Export Workspace
+   - Import Workspace
+   - Delete Workspace
+
+---
+
+# 6. FILE EXPLORER & FILE MANAGEMENT
+
+## 6.1 Overview
+
+File Explorer เป็นระบบจัดการไฟล์หลักของ Workspace
+
+UX ควรได้รับแรงบันดาลใจจาก File Explorer ของระบบปฏิบัติการและ Obsidian
+
+## 6.2 Core Features
+
+### FE-01 Create Folder
+
+ผู้ใช้สามารถสร้าง Folder ได้ในทุกระดับที่มีสิทธิ์
+
+Requirements:
+- สร้าง Folder ใน Root ได้
+- สร้าง Subfolder ได้
+- กำหนดชื่อ Folder ได้
+- ป้องกันชื่อว่าง
+- ป้องกันชื่อซ้ำภายใน Parent เดียวกัน
+
+### FE-02 Create File
+
+ผู้ใช้สามารถสร้างไฟล์ได้
+
+Requirements:
+- รองรับ Markdown เป็นประเภทหลัก
+- สร้างไฟล์ใน Root ได้
+- สร้างไฟล์ใน Folder ได้
+- ตั้งชื่อไฟล์ได้
+- รองรับ Template
+- สร้างไฟล์จาก Quick Create ได้
+
+### FE-03 Rename
+
+ผู้ใช้สามารถเปลี่ยนชื่อ File และ Folder ได้
+
+Requirements:
+- เปลี่ยนชื่อโดยไม่เปลี่ยน ID
+- ตรวจสอบชื่อซ้ำ
+- ปรับชื่อที่แสดงใน File Explorer
+- รักษา Internal Links
+- รักษา Backlinks
+- ไม่เปลี่ยน R2 Object Key หากไม่จำเป็น
+
+### FE-04 Move File
+
+ผู้ใช้สามารถย้าย File ไปยัง Folder ใดก็ได้ภายใน Workspace เดียวกัน
+
+### FE-05 Move Folder
+
+ผู้ใช้สามารถย้าย Folder ไปยังตำแหน่งใดก็ได้ภายใน Workspace เดียวกัน
+
+### FE-06 Multi-file Move
+
+ผู้ใช้สามารถเลือกหลายรายการและย้ายพร้อมกันได้
+
+### FE-07 Drag & Drop
+
+รองรับการลาก File และ Folder ไปยังปลายทาง
+
+### FE-08 Cut & Paste
+
+Desktop รองรับ:
+- Ctrl + X
+- Ctrl + V
+
+ต้องรองรับการย้าย File และ Folder
+
+### FE-09 Context Menu
+
+คลิกขวาหรือเปิดเมนูเพิ่มเติมเพื่อแสดง:
+
+- Open
+- Open in New Tab
+- Rename
+- Move to
+- Copy Link
+- Duplicate
+- Delete
+- Properties
+
+### FE-10 Undo Move
+
+รองรับการย้อนกลับการย้ายไฟล์ผ่าน Operation History
+
+### FE-11 Preserve Identity
+
+การย้าย File หรือ Folder ต้องรักษา:
+
+- File ID
+- Folder ID
+- Created At
+- Version History
+- Content
+- Internal References
+- Attachments
+- AI References
+
+### FE-12 Mobile Operations
+
+Mobile ต้องรองรับ:
+
+- Long Press
+- Multi-select
+- Move
+- Rename
+- Delete
+- Context Actions
+
+## 6.3 Move Operation – Detailed Specification
+
+ระบบต้องรองรับการย้ายข้อมูลทุกทิศทาง
+
+### Case A: Root to Folder
+
+```text
+/Character.md
+        ↓
+/Characters/Character.md
+```
+
+### Case B: Folder to Root
+
+```text
+/Characters/Character.md
+        ↓
+/Character.md
+```
+
+### Case C: Folder to Another Folder
+
+```text
+/Notes/Ideas/Idea.md
+        ↓
+/Worldbuilding/Ideas/Idea.md
+```
+
+### Case D: Move Entire Folder
+
+```text
+/Characters/
+    ├── Lucia.md
+    ├── Lysander.md
+    └── Relationships/
+        └── Lucia-Lysander.md
+
+        ↓
+
+/Archive/Characters/
+    ├── Lucia.md
+    ├── Lysander.md
+    └── Relationships/
+        └── Lucia-Lysander.md
+```
+
+### Case E: Move Folder to Parent
+
+```text
+/Worldbuilding/Geography/Maps/
+        ↓
+/Worldbuilding/Maps/
+```
+
+### Move Validation Rules
+
+- ห้ามย้าย Folder เข้าไปในตัวเอง
+- ห้ามย้าย Folder เข้าไปใน Descendant
+- ห้ามย้ายข้าม Workspace ด้วย Move Operation ปกติ
+- ตรวจสอบสิทธิ์ก่อนย้าย
+- ตรวจสอบชื่อซ้ำในปลายทาง
+- ตรวจสอบการย้ายหลายรายการก่อน Commit
+- หากมีรายการผิดพลาด ต้องรายงานผลแยกรายการ
+- ต้องรองรับ Transaction
+- ต้องมี Operation Log สำหรับ Undo
+- การย้ายอย่างเดียวไม่ควรเปลี่ยน File Content
+- การย้ายอย่างเดียวไม่ควรเปลี่ยน Version ของเนื้อหา
+
+### Cross-Workspace Move
+
+กำหนดเป็นความสามารถแยกจาก Move ปกติ
+
+ต้องพิจารณา:
+- การตรวจสอบสิทธิ์ของ Workspace ต้นทางและปลายทาง
+- การจัดการ Internal Links
+- การจัดการ Attachments
+- การจัดการ ID References
+- การจัดการชื่อซ้ำ
+- การย้าย AI Session และ History ซึ่งไม่ควรถูกย้ายโดยอัตโนมัติ
+- การจัดการ Version History
+
+แนะนำให้เริ่มจาก Cross-Workspace Copy ก่อน แล้วค่อยพัฒนา Move ที่สมบูรณ์ในภายหลัง
+
+## 6.4 File Explorer UI
+
+Desktop:
+- Left Sidebar
+- Hierarchical Tree
+- Expand / Collapse
+- Drag & Drop
+- Context Menu
+- Multi-select
+- Folder Navigation
+
+Mobile:
+- Explorer Drawer
+- Full-screen File Browser
+- Long Press Context Menu
+- Multi-select Mode
+- Move Dialog
+- Breadcrumb Navigation
+
+---
+
+# 7. FILE STORAGE SYSTEM
+
+## 7.1 Storage Principles
+
+แยก Metadata ออกจาก File Content
+
+Cloudflare D1:
+- File Metadata
+- Folder Metadata
+- Workspace Information
+- File Relationships
+- Version Records
+- User Settings
+
+Cloudflare R2:
+- Markdown Content
+- Attachments
+- Images
+- Other Binary Files
+- Export Archives
+
+## 7.2 Logical Path vs Physical Storage
+
+Logical Path คือที่อยู่ของไฟล์ใน File Explorer
+
+Physical Storage Key คือที่เก็บไฟล์จริงใน R2
+
+ตัวอย่าง:
+
+Logical Path:
+
+```text
+/Characters/Lucia.md
+```
+
+R2 Key:
+
+```text
+workspaces/{workspace_id}/files/{file_id}/content.md
+```
+
+ไม่ควรใช้ Logical Path เป็น R2 Key โดยตรง
+
+เหตุผล:
+- ย้ายไฟล์ได้โดยไม่ต้องย้าย Object
+- เปลี่ยนชื่อได้โดยไม่ต้องเปลี่ยน Object
+- รักษา File Identity
+- ลดความซับซ้อนในการย้ายข้อมูล
+- รองรับ Versioning
+
+## 7.3 File Operations
+
+ระบบต้องรองรับ:
+
+- Create
+- Read
+- Update
+- Rename
+- Move
+- Duplicate
+- Soft Delete
+- Restore
+- Permanent Delete
+- Import
+- Export
+
+## 7.4 Trash System
+
+การลบไฟล์และโฟลเดอร์ควรเป็น Soft Delete ก่อน
+
+Requirements:
+- ย้ายรายการไป Trash
+- เก็บ Deleted At
+- เก็บ Original Parent ID
+- Restore ได้
+- ลบถาวรได้
+- แสดงรายการที่ถูกลบ
+- ลบ Folder ต้องจัดการข้อมูลภายในทั้งหมดอย่างถูกต้อง
+- การลบถาวรต้องตรวจสอบสิทธิ์และการอ้างอิง
+
+---
+
+# 8. MARKDOWN EDITOR
+
+## 8.1 Overview
+
+Markdown Editor เป็นส่วนสำคัญที่สุดส่วนหนึ่งของผลิตภัณฑ์
+
+ต้องรองรับการเขียนและจัดการเอกสารอย่างมีประสิทธิภาพ
+
+## 8.2 Core Requirements
+
+### ED-01 Markdown Support
+
+รองรับ:
+- Headings
+- Paragraphs
+- Bold
+- Italic
+- Strikethrough
+- Lists
+- Ordered Lists
+- Checklists
+- Blockquotes
+- Code Blocks
+- Inline Code
+- Tables
+- Links
+- Images
+- Horizontal Rules
+
+### ED-02 Markdown Extensions
+
+รองรับ:
+- YAML Frontmatter
+- Internal Links
+- Tags
+- Callouts
+- Math / LaTeX
+- Embedded Files
+- Wiki-style Links
+
+### ED-03 Editor Modes
+
+ต้องรองรับแนวทางการแก้ไข Markdown
+
+- Live Preview
+- Source Mode
+
+ควรออกแบบสถาปัตยกรรมให้เพิ่มโหมดอื่นได้โดยไม่ต้องเขียน Editor ใหม่
+
+ค่าเริ่มต้นที่เสนอ: Live Preview พร้อมความสามารถเข้าถึง Markdown Source
+
+### ED-04 Auto Save
+
+Requirements:
+- บันทึกอัตโนมัติ
+- Debounced Save
+- แสดงสถานะ Saving
+- แสดงสถานะ Saved
+- แสดงสถานะ Error
+- Retry เมื่อบันทึกไม่สำเร็จ
+- ป้องกันข้อมูลสูญหายระหว่างการเปลี่ยนไฟล์
+
+### ED-05 Properties / YAML Frontmatter
+
+ตัวอย่าง:
+
+```yaml
+---
+id: CHAR-0001
+title: Lucia
+type: character
+status: active
+created_at: 2026-10-31T10:00:00Z
+updated_at: 2026-10-31T12:00:00Z
+tags:
+  - character
+  - protagonist
+related:
+  - LOC-0001
+---
+```
+
+Requirements:
+- อ่าน YAML ได้
+- แสดง Properties UI
+- แก้ไข Properties ได้
+- เพิ่มและลบ Properties ได้
+- รองรับ Custom Properties
+- ป้องกันข้อมูล Frontmatter เสียหาย
+- รองรับ Tags และ Relations
+
+### ED-06 Internal Links
+
+รูปแบบ:
+
+```markdown
+[[Lucia]]
+[[Lysander Village]]
+[[Worldbuilding/History]]
+```
+
+Requirements:
+- Autocomplete
+- Link Suggestions
+- Open Linked File
+- Create Missing Link
+- Link Resolution
+- Link Preview
+
+### ED-07 Backlinks
+
+แสดงรายการไฟล์ที่อ้างถึงไฟล์ปัจจุบัน
+
+Requirements:
+- Backlinks Panel
+- Source File
+- Reference Context
+- Click to Navigate
+- Update เมื่อมีการเปลี่ยนแปลง Links
+
+### ED-08 Outline
+
+แสดงโครงสร้าง Heading ของเอกสาร
+
+### ED-09 Word Count
+
+แสดง:
+- Word Count
+- Character Count
+- Character Count Without Spaces
+- Paragraph Count
+- Reading Time (Optional)
+
+### ED-10 Search & Replace
+
+รองรับ:
+- Find
+- Replace
+- Replace All
+- Case Sensitive
+- Whole Word
+- Regex (Optional)
+
+## 8.3 Editor Interface
+
+Desktop Layout:
+
+```text
+┌───────────────────────────────────────────────────────────┐
+│ Top Toolbar / Search / Tabs                                │
+├──────────────┬─────────────────────────┬──────────────────┤
+│              │                         │                  │
+│ File         │ Markdown Editor         │ Properties       │
+│ Explorer     │                         │                  │
+│              │                         │ Backlinks        │
+│              │                         │                  │
+│              │                         │ Outline          │
+│              │                         │                  │
+├──────────────┴─────────────────────────┴──────────────────┤
+│ Status Bar / Word Count / Save Status                      │
+└───────────────────────────────────────────────────────────┘
+```
+
+## 8.4 Mobile Editor
+
+Mobile ต้องไม่ใช่ Desktop ที่ถูกย่อขนาด
+
+Requirements:
+- Editor เต็มหน้าจอ
+- File Explorer เป็น Drawer
+- Properties เป็น Bottom Sheet
+- Backlinks เป็น Bottom Sheet
+- Outline เปิดผ่าน Panel
+- Toolbar ต้องเหมาะกับ Touch
+- Keyboard ต้องไม่บังเนื้อหา
+- ปุ่มบันทึกและสร้าง Note ต้องเข้าถึงง่าย
+- รองรับ Portrait และ Landscape
+
+---
+
+# 9. KNOWLEDGE MANAGEMENT SYSTEM
+
+## 9.1 Overview
+
+ระบบจัดการความรู้เป็นชั้นที่ช่วยให้ผู้ใช้จัดระเบียบข้อมูลมากกว่าแค่การเก็บไฟล์
+
+อย่างไรก็ตาม ระบบต้องไม่บังคับให้ผู้ใช้ใช้โครงสร้าง Folder หรือประเภทข้อมูลที่กำหนดไว้
+
+ผู้ใช้สามารถสร้างเอกสาร Markdown ทั่วไปได้ตลอดเวลา
+
+## 9.2 Knowledge Types
+
+ประเภทข้อมูลที่ระบบสามารถเตรียม Template ให้:
+
+### General Notes
+- Journal
+- Daily Notes
+- Writing Log
+- Observation
+- Idea
+- Research
+- Decision
+
+### Novel Knowledge
+- Character
+- Location
+- Organization
+- Race & Species
+- Creature
+- Item & Artifact
+- Relationship
+
+### Worldbuilding
+- Geography
+- History
+- Culture
+- Politics
+- Religion
+- Economy
+- Technology
+- Magic System
+
+### Story Planning
+- Main Plot
+- Subplot
+- Chapter Outline
+- Timeline
+- Event
+- Unresolved Mystery
+
+### Tracking
+- Promise
+- Oath
+- Quest
+- Task
+- Project
+
+## 9.3 Templates
+
+ระบบควรมี Template Library
+
+ตัวอย่าง Character Template:
+
+```yaml
+---
+id: CHAR-0001
+type: character
+name: Lucia
+status: active
+tags:
+  - character
+---
+
+# Character Profile
+
+## Basic Information
+
+## Appearance
+
+## Personality
+
+## Background
+
+## Relationships
+
+## Goals
+
+## Conflicts
+
+## Character Development
+```
+
+ตัวอย่าง Event Template:
+
+```yaml
+---
+id: EVT-0001
+type: event
+status: planned
+story_date:
+created_at:
+related:
+---
+
+# Event Name
+
+## Summary
+
+## Participants
+
+## Location
+
+## Cause
+
+## Consequences
+
+## Related Events
+```
+
+---
+
+# 10. NOTES & EVENT LOG SYSTEM
+
+## 10.1 Notes Architecture
+
+Notes เป็นระบบบันทึกข้อมูลตามลำดับเวลา
+
+หลักการ:
+- หนึ่งบันทึก = หนึ่งไฟล์
+- สร้างบันทึกใหม่ ไม่เขียนทับบันทึกเดิม
+- ตั้งชื่อไฟล์ตามวันและเวลา
+- เรียงจากใหม่ไปเก่า
+- รองรับ Inbox
+- รองรับ Note Types
+- รองรับ Metadata
+
+ตัวอย่างชื่อไฟล์:
+
+```text
+2026-10-31_10-30.md
+2026-10-31_14-45.md
+2026-10-31_20-00.md
+```
+
+## 10.2 Note Types
+
+- Journal
+- Writing Log
+- Character Log
+- Event Log
+- Promise
+- Oath
+- Quest
+- Task
+- Dialogue
+- Observation
+- Research
+- Idea
+- Decision
+
+## 10.3 Metadata
+
+```yaml
+---
+id: NOTE-0001
+date: 2026-10-31
+time: "10:30"
+created_at: 2026-10-31T10:30:00Z
+type: writing-log
+status: active
+related:
+  - CHAR-0001
+tags:
+  - novel
+  - writing
+---
+```
+
+ข้อกำหนด:
+- `created_at` คือวันที่สร้างบันทึกจริง
+- `story_date` คือวันที่เหตุการณ์เกิดขึ้นในโลกของเรื่อง
+- ทั้งสองค่าต้องแยกจากกัน
+- Note ต้องมี ID ไม่ซ้ำกัน
+- Note สามารถเชื่อมโยง Entity อื่นได้
+
+## 10.4 Append-only Concept
+
+ข้อมูลประวัติศาสตร์หรือบันทึกเหตุการณ์ควรเก็บเป็น Log ใหม่
+
+ไม่ควรเขียนทับประวัติเดิมโดยไม่เหลือหลักฐาน
+
+ตัวอย่าง:
+
+```text
+Promise: PR-0001
+
+Logs:
+├── 2026-01-01: Created
+├── 2026-01-10: Updated
+├── 2026-01-20: Fulfilled
+└── 2026-01-21: Reviewed
+```
+
+แนะนำสถาปัตยกรรมแบบ:
+
+**Immutable Logs + Current State**
+
+หมายถึง:
+- เก็บประวัติการเปลี่ยนแปลงเป็น Log
+- มี Current State สำหรับแสดงสถานะล่าสุด
+- ไม่จำเป็นต้องให้ทุกไฟล์ในระบบเป็น Append-only
+- เนื้อหาทั่วไปสามารถแก้ไขได้ตามปกติ
+- ประวัติ Version ควรเก็บแยกจาก Current Content
+
+แนวทางนี้ให้ความยืดหยุ่นมากกว่า Append-only ทั้งระบบ
+
+## 10.5 Status Tracking
+
+Promise / Oath:
+
+- Active
+- Fulfilled
+- Broken
+- Expired
+- Released
+
+Quest / Task:
+
+- Planned
+- Pending
+- In Progress
+- Completed
+- Failed
+- Cancelled
+- On Hold
+
+Event:
+
+- Planned
+- Ongoing
+- Occurred
+- Concluded
+- Cancelled
+
+Status History ต้องบันทึกการเปลี่ยนแปลงได้
+
+---
+
+# 11. TIMELINE & STORY MANAGEMENT
+
+## 11.1 Timeline
+
+ระบบ Timeline ใช้แสดงเหตุการณ์ตามลำดับเวลา
+
+Requirements:
+- Story Date
+- Event Name
+- Event Description
+- Related Characters
+- Related Locations
+- Event Status
+- Event Relations
+- Chronological Sorting
+
+## 11.2 Story Planning
+
+รองรับ:
+- Main Plot
+- Subplots
+- Chapters
+- Scenes
+- Story Arcs
+- Character Arcs
+- Events
+- Unresolved Mysteries
+
+## 11.3 Relationship Management
+
+สามารถเชื่อมโยงข้อมูล เช่น:
+
+- Character to Character
+- Character to Location
+- Character to Event
+- Event to Event
+- Event to Location
+- Organization to Character
+- Item to Character
+
+การเชื่อมโยงควรอ้างอิง Entity ID เป็นหลัก
+
+---
+
+# 12. SEARCH SYSTEM
+
+## 12.1 Global Search
+
+ค้นหาทั่วทั้ง Workspace
+
+ค้นหา:
+- File Names
+- Folder Names
+- Markdown Content
+- Properties
+- Tags
+- Internal Links
+
+## 12.2 Search in Folder
+
+จำกัดขอบเขตการค้นหาเฉพาะ Folder ที่เลือก
+
+## 12.3 Quick Switcher
+
+เปิดไฟล์อย่างรวดเร็วด้วยการค้นหาชื่อ
+
+ควรรองรับ Keyboard Shortcut เช่น Ctrl + O
+
+## 12.4 Search Architecture
+
+Phase 1:
+- Keyword Search
+- SQLite FTS5 ใน D1 เมื่อเหมาะสมกับขนาดและข้อจำกัด
+- Metadata Search
+- Title Search
+
+Phase 2:
+- Semantic Search
+- Embeddings
+- Vectorize หรือระบบ Vector Search ที่เหมาะสม
+
+ข้อกำหนด:
+- ทุก Search ต้องมี Workspace Scope
+- ผลลัพธ์ต้องไม่ข้าม Workspace
+- ตรวจสอบสิทธิ์ก่อนคืนผลลัพธ์
+- แสดง File Path
+- คลิกเปิดไฟล์ได้
+- รองรับ Search Snippets
+
+---
+
+# 13. AI KNOWLEDGE ASSISTANT
+
+## 13.1 Overview
+
+AI Assistant เป็นระบบสนทนาที่สามารถค้นหา อ่าน และวิเคราะห์ข้อมูลภายใน Workspace ปัจจุบัน
+
+เป้าหมายคือทำให้ AI เข้าใจองค์ความรู้ของผู้ใช้โดยไม่ต้องส่งข้อมูลทั้งหมดเข้าไปในทุกคำถาม
+
+AI ต้องทำงานแบบ Read-only เท่านั้น
+
+## 13.2 Core Principles
+
+1. AI อ่านข้อมูลได้
+2. AI ค้นหาไฟล์ได้
+3. AI วิเคราะห์ข้อมูลได้
+4. AI สรุปข้อมูลได้
+5. AI เชื่อมโยงข้อมูลได้
+6. AI ตอบพร้อมแหล่งอ้างอิงได้
+7. AI ไม่สามารถสร้างไฟล์ได้
+8. AI ไม่สามารถแก้ไขไฟล์ได้
+9. AI ไม่สามารถลบไฟล์ได้
+10. AI ไม่สามารถย้ายไฟล์ได้
+11. AI ไม่สามารถแก้ไข Properties ได้
+12. AI ไม่สามารถเข้าถึง Workspace อื่นได้
+
+## 13.3 AI Read-only Permissions
+
+อนุญาต:
+
+```text
+list_files
+search_files
+read_file
+get_file_metadata
+get_workspace_instructions
+```
+
+ไม่อนุญาต:
+
+```text
+create_file
+update_file
+delete_file
+rename_file
+move_file
+create_folder
+update_properties
+delete_folder
+update_workspace
+```
+
+ข้อกำหนดสำคัญ:
+
+การจำกัดสิทธิ์ต้องบังคับใช้ใน Backend API และ Tool Registry ไม่ใช่แค่เขียนคำสั่งห้าม AI ใน System Prompt
+
+AI ไม่มี SQL Access และไม่มี R2 Direct Access
+
+## 13.4 Workspace Isolation
+
+AI ต้องทำงานภายใต้ Workspace ที่ผู้ใช้เปิดอยู่เท่านั้น
+
+ตัวอย่าง:
+
+```text
+User
+│
+└── Active Workspace: ธุลีมนตรา
+    │
+    └── AI Assistant
+        │
+        ├── Read Characters/
+        ├── Read Worldbuilding/
+        ├── Read Story Planning/
+        └── Read Manuscript/
+```
+
+ห้ามเข้าถึง:
+
+```text
+Personal Knowledge
+Project Alpha
+Other Users' Workspaces
+```
+
+ข้อกำหนด:
+- Active Workspace ID ต้องได้จาก Authenticated Server Context
+- ห้ามเชื่อ Workspace ID ที่ AI ส่งมาเอง
+- ทุก Retrieval ต้องตรวจ Owner และ Permission
+- ทุก Query ต้อง Scope ด้วย Workspace ID
+- Chat Session ต้องผูกกับ Workspace
+- Vector Search ต้องมี Workspace Filter
+- ห้ามมี Global Cross-Workspace Retrieval โดยไม่มีการออกแบบสิทธิ์เฉพาะ
+
+## 13.5 AI Retrieval Workflow
+
+```text
+User Question
+      │
+      ▼
+Authenticate User
+      │
+      ▼
+Resolve Active Workspace
+      │
+      ▼
+Load Workspace Instructions
+      │
+      ▼
+Analyze User Question
+      │
+      ▼
+Search Relevant Files
+      │
+      ▼
+Read Selected Files
+      │
+      ▼
+Build AI Context
+      │
+      ▼
+Send to AI Provider
+      │
+      ▼
+Generate Answer
+      │
+      ▼
+Attach Source Citations
+      │
+      ▼
+Display Response
+```
+
+## 13.6 Retrieval Tools
+
+### list_files
+
+แสดงรายการไฟล์และ Folder ภายใน Workspace
+
+### search_files
+
+ค้นหาไฟล์ตาม Keyword หรือ Semantic Query
+
+### read_file
+
+อ่านเนื้อหาไฟล์ที่มีสิทธิ์เข้าถึง
+
+### get_file_metadata
+
+อ่าน Metadata เช่น:
+- File ID
+- Name
+- Type
+- Path
+- Properties
+- Created At
+- Updated At
+
+ทุก Tool ต้องมี Permission Check
+
+## 13.7 Context Management
+
+ไม่ควรส่งทุกไฟล์ใน Workspace ให้ AI ทุกครั้ง
+
+ควรใช้ Retrieval-Augmented Generation (RAG)
+
+แนวทาง:
+1. วิเคราะห์คำถาม
+2. ค้นหาไฟล์ที่เกี่ยวข้อง
+3. เลือกข้อมูลที่เกี่ยวข้อง
+4. อ่านเนื้อหาที่จำเป็น
+5. ประกอบ Context
+6. ส่งให้ AI
+
+ข้อดี:
+- ลด Token Cost
+- ลด Latency
+- เพิ่มความแม่นยำ
+- ลดการส่งข้อมูลที่ไม่จำเป็น
+- รองรับ Workspace ขนาดใหญ่
+
+## 13.8 Workspace Instructions
+
+แต่ละ Workspace สามารถกำหนดคำสั่ง AI ของตัวเองได้
+
+ตัวอย่าง:
+
+```markdown
+# Workspace Instructions
+
+You are an assistant for this novel workspace.
+
+## Role
+Act as a novel development and continuity assistant.
+
+## Rules
+- Use the current workspace as the only knowledge source.
+- Do not invent established story facts.
+- Distinguish confirmed facts from assumptions.
+- Identify contradictions.
+- Cite source files when possible.
+- Never modify workspace files.
+
+## Response Style
+- Respond in Thai.
+- Be analytical and precise.
+- Explain continuity issues clearly.
+```
+
+Instructions ต้องไม่สามารถ Override Security Policy ของระบบได้
+
+ลำดับความสำคัญ:
+
+1. Platform Security Rules
+2. Backend Permission Rules
+3. Application System Instructions
+4. Workspace Instructions
+5. Chat Context
+6. Retrieved File Content
+7. User Question
+
+Retrieved File Content ถือเป็นข้อมูล ไม่ใช่คำสั่งที่มีสิทธิ์เปลี่ยน Security Policy
+
+## 13.9 Prompt Injection Protection
+
+เนื้อหาในไฟล์เป็น Untrusted Data
+
+ระบบต้อง:
+- ไม่เชื่อคำสั่งที่อยู่ในไฟล์โดยอัตโนมัติ
+- แยก Instructions ออกจาก Retrieved Content
+- จำกัด Tool Permissions
+- ตรวจสอบทุก Tool Call
+- จำกัดขอบเขต Retrieval
+- ป้องกันการเข้าถึงข้อมูลข้าม Workspace
+
+## 13.10 AI Source Citations
+
+คำตอบของ AI ควรอ้างอิง:
+
+- File Name
+- File Path
+- Relevant Text
+- File ID
+- Source Reference
+
+ตัวอย่าง:
+
+```text
+Lucia มีความสัมพันธ์กับ Lysander
+ตามข้อมูลใน Character Profile
+
+Source:
+Characters/Lucia.md
+Characters/Lysander.md
+```
+
+เมื่อคลิก Source ต้องเปิดไฟล์ที่เกี่ยวข้องได้
+
+## 13.11 AI Chat Sessions
+
+รองรับ:
+- New Chat
+- Rename Chat
+- Delete Chat
+- Chat History
+- Streaming Response
+- Provider Selection
+- Model Selection
+- Context Attachment
+- Source Viewer
+
+Chat Session ต้องผูกกับ Workspace
+
+## 13.12 Manual Context Attachment
+
+ผู้ใช้สามารถเลือกไฟล์หรือ Folder เพื่อกำหนด Context ให้ AI ได้เอง
+
+ตัวอย่าง:
+
+```text
+Selected Context:
+├── Characters/Lucia.md
+├── Characters/Lysander.md
+└── Worldbuilding/History.md
+```
+
+ต้องตรวจสอบสิทธิ์และ Workspace Scope เช่นเดียวกับ Retrieval ปกติ
+
+---
+
+# 14. AI PROVIDER & MODEL MANAGEMENT
+
+## 14.1 Overview
+
+ระบบต้องรองรับการเชื่อมต่อ AI Provider ได้หลายราย
+
+ไม่ควรออกแบบให้ผูกกับ Gemini เพียงรายเดียว
+
+## 14.2 Initial Provider Support
+
+Provider แรกที่เสนอ:
+
+- Google Gemini Native API
+- OpenAI-compatible API Providers
+
+สถาปัตยกรรมควรสามารถเพิ่ม Provider Protocol อื่นได้ภายหลัง
+
+## 14.3 Provider Configuration
+
+Fields:
+
+- Provider Name
+- Provider Type
+- API Base URL
+- API Key
+- API Protocol
+- Custom Headers
+- Model List
+- Default Model
+- Connection Status
+
+## 14.4 Model Management
+
+รองรับ:
+- Fetch Models
+- Manual Model Entry
+- Select Model
+- Set Default Model
+- Test Connection
+- Remove Provider
+
+ไม่ควรสมมติว่า Provider ทุกรายมี Models Endpoint เหมือนกัน
+
+ต้องมี Adapter ตาม Protocol
+
+## 14.5 API Key Security
+
+ข้อกำหนด:
+- ห้ามเก็บ API Key ใน localStorage
+- ห้ามส่ง API Key กลับไป Frontend หลังบันทึก
+- เข้ารหัส API Key ก่อนจัดเก็บ
+- เก็บ Encryption Master Key ใน Cloudflare Secrets
+- Decrypt เฉพาะใน Backend Worker
+- ไม่บันทึก API Key ใน Logs
+- ไม่เปิดเผย API Key ใน Error Messages
+- ใช้ HTTPS เท่านั้น
+
+---
+
+# 15. AI CHAT USER EXPERIENCE
+
+## 15.1 Desktop
+
+Layout:
+
+```text
+┌─────────────────────────────────────────────────────┐
+│ Workspace / AI Assistant                             │
+├────────────────┬────────────────────────────────────┤
+│ Chat History   │ Conversation                        │
+│                │                                      │
+│ New Chat       │ User Question                       │
+│                │                                      │
+│ Previous Chat  │ AI Response                         │
+│ Previous Chat  │                                      │
+│ Previous Chat  │ Source Citations                    │
+│                │                                      │
+├────────────────┴────────────────────────────────────┤
+│ Attach Context / Message Input / Model Selector       │
+└─────────────────────────────────────────────────────┘
+```
+
+## 15.2 Mobile
+
+- AI Chat เต็มหน้าจอ
+- Chat History เป็น Drawer
+- Context Attachment เป็น Bottom Sheet
+- Model Selector ใช้งานผ่าน Dialog หรือ Bottom Sheet
+- Message Input ต้องรองรับ Mobile Keyboard
+- Source Citation ต้องเปิดไฟล์ได้
+
+---
+
+# 16. APPLICATION UI/UX
+
+## 16.1 Design Direction
+
+Design Principles:
+- Minimal
+- Clean
+- Functional
+- Content-focused
+- Responsive
+- Low Visual Noise
+- Consistent
+- Accessible
+
+ไม่ควรใส่ UI Elements มากเกินความจำเป็น
+
+## 16.2 Desktop Navigation
+
+Main Navigation:
+- Workspace Switcher
+- File Explorer
+- Search
+- Graph
+- AI Assistant
+- Settings
+
+Editor Workspace:
+- Left Sidebar
+- Main Editor
+- Right Sidebar
+- Top Toolbar
+- Tabs
+- Status Bar
+
+## 16.3 Mobile Navigation
+
+Bottom Navigation:
+
+1. Explorer
+2. Editor
+3. Search
+4. Graph
+5. AI
+
+ควรปรับตามขนาดหน้าจอและ Context การใช้งาน
+
+## 16.4 Responsive Breakpoints
+
+กำหนด Breakpoint ตาม Design System เช่น:
+
+- Mobile: ต่ำกว่า 768px
+- Tablet: 768px–1023px
+- Desktop: 1024px ขึ้นไป
+
+Breakpoints สามารถปรับได้ตามการทดสอบจริง
+
+## 16.5 Theme
+
+รองรับ:
+- Light Mode
+- Dark Mode
+- System Preference
+
+## 16.6 Accessibility
+
+- Keyboard Navigation
+- Focus States
+- Screen Reader Labels
+- Color Contrast
+- Touch Target Size
+- Semantic HTML
+- Reduced Motion Preference
+
+---
+
+# 17. DATABASE ARCHITECTURE
+
+## 17.1 Database Principles
+
+ใช้ Cloudflare D1 เป็นฐานข้อมูลหลักสำหรับ Metadata และ Relational Data
+
+ใช้ Cloudflare R2 สำหรับ File Content และ Binary Objects
+
+ต้องแยกข้อมูลตาม User และ Workspace อย่างชัดเจน
+
+## 17.2 Core Tables
+
+### users
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| email | TEXT | User Email |
+| name | TEXT | Display Name |
+| avatar_url | TEXT | Avatar |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+
+### workspaces
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| owner_id | TEXT | User ID |
+| name | TEXT | Workspace Name |
+| description | TEXT | Description |
+| icon | TEXT | Workspace Icon |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+| deleted_at | TEXT | Soft Delete |
+
+### folders
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| parent_id | TEXT | Parent Folder ID, NULL = Root |
+| name | TEXT | Folder Name |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+| deleted_at | TEXT | Soft Delete |
+
+### files
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| parent_id | TEXT | Parent Folder ID, NULL = Root |
+| name | TEXT | File Name |
+| extension | TEXT | File Extension |
+| mime_type | TEXT | MIME Type |
+| r2_key | TEXT | R2 Object Key |
+| size | INTEGER | File Size |
+| content_hash | TEXT | Content Hash |
+| version | INTEGER | Current Version |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+| deleted_at | TEXT | Soft Delete |
+
+### workspace_instructions
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| content | TEXT | Instructions |
+| updated_at | TEXT | Update Time |
+
+### ai_providers
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| user_id | TEXT | Owner |
+| name | TEXT | Provider Name |
+| protocol | TEXT | API Protocol |
+| base_url | TEXT | API Endpoint |
+| encrypted_api_key | TEXT | Encrypted Key |
+| default_model | TEXT | Default Model |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+
+### ai_sessions
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| user_id | TEXT | User ID |
+| title | TEXT | Session Title |
+| provider_id | TEXT | Provider ID |
+| model_id | TEXT | Model ID |
+| created_at | TEXT | Creation Time |
+| updated_at | TEXT | Update Time |
+
+### ai_messages
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| session_id | TEXT | Session ID |
+| role | TEXT | User / Assistant |
+| content | TEXT | Message |
+| created_at | TEXT | Creation Time |
+
+### file_versions
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| file_id | TEXT | File ID |
+| workspace_id | TEXT | Workspace ID |
+| version | INTEGER | Version Number |
+| r2_key | TEXT | Version Object Key |
+| content_hash | TEXT | Content Hash |
+| created_at | TEXT | Creation Time |
+
+### file_links
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| source_file_id | TEXT | Source File |
+| target_file_id | TEXT | Target File |
+| link_type | TEXT | Link Type |
+
+### file_operations
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| user_id | TEXT | Actor |
+| operation_type | TEXT | Move / Rename / Delete |
+| target_ids | TEXT | Affected IDs |
+| previous_state | TEXT | Previous Metadata |
+| new_state | TEXT | New Metadata |
+| created_at | TEXT | Operation Time |
+
+### workspace_settings
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| settings_json | TEXT | Settings |
+| updated_at | TEXT | Update Time |
+
+### note_logs
+
+| Field | Type | Description |
+|---|---|---|
+| id | TEXT | Primary Key |
+| workspace_id | TEXT | Workspace ID |
+| target_id | TEXT | Entity ID |
+| event_type | TEXT | Event Type |
+| payload | TEXT | Event Data |
+| created_at | TEXT | Event Time |
+
+## 17.3 Additional Tables for Future Expansion
+
+- workspace_members
+- workspace_invitations
+- workspace_permissions
+- attachments
+- tags
+- file_tags
+- entities
+- entity_relations
+- search_index
+- ai_context_attachments
+- ai_message_sources
+- ai_usage_logs
+- audit_logs
+- import_jobs
+- export_jobs
+- deletion_jobs
+
+## 17.4 Database Constraints
+
+ต้องมี:
+- Primary Keys
+- Foreign Keys
+- Indexes
+- Unique Constraints
+- Workspace Scoping
+- Referential Integrity
+- Transactional Operations
+
+ข้อควรระวัง:
+
+D1/SQLite มีรายละเอียดด้าน Constraint และ Index ที่ต้องออกแบบให้เหมาะสม
+
+การป้องกันชื่อซ้ำต้องคำนึงถึง Soft Delete และ Case Sensitivity ด้วย
+
+ไม่ควรสร้าง Unique Constraint แบบง่าย ๆ ที่ทำให้ชื่อที่ถูกลบแล้วไม่สามารถนำกลับมาใช้ได้ตลอดไป
+
+---
+
+# 18. API ARCHITECTURE
+
+## 18.1 API Principles
+
+ใช้ REST API ผ่าน Cloudflare Workers ในระยะแรก
+
+ออกแบบให้:
+- มี Version Prefix
+- ใช้ JSON
+- มี Standard Error Format
+- ตรวจ Authentication ทุก Request
+- ตรวจ Workspace Ownership
+- Validate Input
+- Rate Limit
+- รองรับ Pagination
+
+ตัวอย่าง Prefix:
+
+```text
+/api/v1
+```
+
+## 18.2 Authentication APIs
+
+```text
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+GET    /api/v1/auth/me
+```
+
+ใช้ Authentication Provider ที่รองรับการจัดการ Session อย่างปลอดภัย
+
+## 18.3 Workspace APIs
+
+```text
+GET    /api/v1/workspaces
+POST   /api/v1/workspaces
+GET    /api/v1/workspaces/:workspaceId
+PATCH  /api/v1/workspaces/:workspaceId
+DELETE /api/v1/workspaces/:workspaceId
+```
+
+## 18.4 Folder APIs
+
+```text
+GET    /api/v1/workspaces/:workspaceId/folders
+POST   /api/v1/workspaces/:workspaceId/folders
+PATCH  /api/v1/folders/:folderId
+DELETE /api/v1/folders/:folderId
+POST   /api/v1/folders/:folderId/move
+```
+
+## 18.5 File APIs
+
+```text
+GET    /api/v1/workspaces/:workspaceId/files
+POST   /api/v1/workspaces/:workspaceId/files
+GET    /api/v1/files/:fileId
+PATCH  /api/v1/files/:fileId
+DELETE /api/v1/files/:fileId
+POST   /api/v1/files/:fileId/move
+POST   /api/v1/files/:fileId/duplicate
+```
+
+## 18.6 Bulk Operations
+
+```text
+POST   /api/v1/workspaces/:workspaceId/files/bulk-move
+POST   /api/v1/workspaces/:workspaceId/files/bulk-delete
+POST   /api/v1/workspaces/:workspaceId/files/bulk-restore
+```
+
+## 18.7 Search APIs
+
+```text
+GET    /api/v1/workspaces/:workspaceId/search
+GET    /api/v1/workspaces/:workspaceId/quick-switcher
+GET    /api/v1/files/:fileId/backlinks
+GET    /api/v1/files/:fileId/outgoing-links
+```
+
+## 18.8 AI APIs
+
+```text
+GET    /api/v1/ai/providers
+POST   /api/v1/ai/providers
+PATCH  /api/v1/ai/providers/:providerId
+DELETE /api/v1/ai/providers/:providerId
+
+GET    /api/v1/ai/providers/:providerId/models
+POST   /api/v1/ai/providers/:providerId/test
+
+GET    /api/v1/workspaces/:workspaceId/ai/instructions
+PUT    /api/v1/workspaces/:workspaceId/ai/instructions
+
+GET    /api/v1/workspaces/:workspaceId/ai/sessions
+POST   /api/v1/workspaces/:workspaceId/ai/sessions
+
+GET    /api/v1/ai/sessions/:sessionId/messages
+POST   /api/v1/ai/sessions/:sessionId/messages
+DELETE /api/v1/ai/sessions/:sessionId
+```
+
+## 18.9 AI Retrieval APIs
+
+```text
+POST /api/v1/ai/retrieval/search
+POST /api/v1/ai/retrieval/read
+POST /api/v1/ai/retrieval/list
+```
+
+Retrieval API ต้องเป็น Read-only โดยออกแบบให้ AI ไม่สามารถเรียก Write API ได้
+
+---
+
+# 19. CLOUD INFRASTRUCTURE
+
+## 19.1 Recommended Technology Stack
+
+Frontend:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Lucide Icons
+
+Backend:
+- Cloudflare Workers
+- TypeScript
+- REST API
+
+Database:
+- Cloudflare D1
+
+Storage:
+- Cloudflare R2
+
+Cache:
+- Cloudflare KV (ใช้เมื่อมีความจำเป็น)
+
+Advanced:
+- Cloudflare Durable Objects
+- Cloudflare Vectorize
+
+Editor:
+- CodeMirror 6
+
+State Management:
+- Zustand
+
+Routing:
+- React Router
+
+Markdown:
+- remark
+- unified
+- remark-gfm
+- YAML Parser
+
+AI:
+- Gemini API
+- OpenAI-compatible API
+- Provider Adapter Architecture
+
+## 19.2 Infrastructure Overview
+
+```text
+                    USER
+                     │
+                     ▼
+               WEB APPLICATION
+                     │
+                     ▼
+              CLOUDFLARE WORKERS
+                     │
+          ┌──────────┼──────────┐
+          │          │          │
+          ▼          ▼          ▼
+        D1 DB       R2       KV Cache
+          │          │          │
+          └──────────┼──────────┘
+                     │
+                     ▼
+               AI SERVICE LAYER
+                     │
+          ┌──────────┼──────────┐
+          │          │          │
+          ▼          ▼          ▼
+        Gemini    OpenAI-     Other
+                   Compatible Providers
+```
+
+## 19.3 Cloudflare Service Responsibilities
+
+### Workers
+- API Gateway
+- Authentication Validation
+- Business Logic
+- File Operations
+- Permission Validation
+- AI Orchestration
+- Provider Adapters
+
+### D1
+- User Metadata
+- Workspace Metadata
+- File Tree
+- File Metadata
+- AI Sessions
+- Version Metadata
+- Relationships
+
+### R2
+- Markdown Content
+- Attachments
+- Images
+- Version Objects
+- Export Archives
+
+### KV
+- Cache
+- Temporary Data
+- Short-lived Metadata
+
+ห้ามใช้ KV เป็นแหล่งข้อมูลหลักสำหรับ File Tree ที่ต้องการ Transaction และ Referential Integrity
+
+### Durable Objects
+
+ใช้ในอนาคตสำหรับ:
+- Realtime Collaboration
+- Concurrent Editing Coordination
+- Sync State
+- Presence
+
+### Vectorize
+
+ใช้ในอนาคตสำหรับ:
+- Semantic Search
+- Embedding Retrieval
+- AI Knowledge Search
+
+ต้องมี Workspace Isolation ใน Metadata Filter ทุกครั้ง
+
+---
+
+# 20. SECURITY & DATA PRIVACY
+
+## 20.1 Authentication
+
+- ทุก API ที่เข้าถึงข้อมูลส่วนตัวต้องตรวจ Authentication
+- Session ต้องมีอายุและการหมดอายุที่เหมาะสม
+- รองรับ Logout
+- ป้องกัน Session Hijacking
+- ป้องกัน CSRF ตามรูปแบบ Authentication ที่ใช้
+
+## 20.2 Authorization
+
+- ผู้ใช้เข้าถึงเฉพาะ Workspace ที่ตนเป็นเจ้าของหรือได้รับอนุญาต
+- ทุก File ต้องตรวจ Workspace Ownership
+- ทุก Folder ต้องตรวจ Workspace Ownership
+- AI Retrieval ต้องตรวจสิทธิ์
+- ห้ามเชื่อ ID จาก Client โดยไม่ตรวจสอบ
+
+## 20.3 Data Isolation
+
+ทุก Query ต้องมี Scope ที่เหมาะสม
+
+ตัวอย่าง:
+
+```sql
+SELECT *
+FROM files
+WHERE id = ?
+  AND workspace_id = ?;
+```
+
+ไม่ควรค้นหาไฟล์ด้วย ID เพียงอย่างเดียวโดยไม่ตรวจ Workspace
+
+## 20.4 API Key Protection
+
+- Encrypt at Rest
+- HTTPS in Transit
+- Secrets Management
+- No Client-side Secret Storage
+- No API Key Logging
+- No API Key Exposure
+
+## 20.5 Data Integrity
+
+- Transaction สำหรับ Batch Operations
+- Validate Parent Relationships
+- Validate Workspace Ownership
+- Prevent Circular Folder References
+- Preserve File Identity
+- Protect Against Accidental Deletion
+
+## 20.6 Audit Logging
+
+บันทึกเหตุการณ์สำคัญ:
+- Login
+- Logout
+- Workspace Create
+- Workspace Delete
+- File Create
+- File Update
+- File Move
+- File Delete
+- Restore
+- Provider Changes
+- Security Events
+
+ไม่ควรเก็บเนื้อหาลับหรือ API Keys ใน Audit Logs
+
+---
+
+# 21. PERFORMANCE & RELIABILITY
+
+## 21.1 Performance Goals
+
+เป้าหมายเบื้องต้นสำหรับการออกแบบและทดสอบ:
+
+- Workspace Navigation ต้องตอบสนองรวดเร็ว
+- File Explorer ต้องไม่โหลดทุกไฟล์ใน Workspace พร้อมกัน
+- Editor ต้องเปิดไฟล์ขนาดทั่วไปได้อย่างลื่นไหล
+- Search ต้องรองรับ Pagination
+- AI Response ต้องรองรับ Streaming
+- Auto Save ต้องไม่ส่ง Request ทุกครั้งที่พิมพ์
+- Mobile UI ต้องไม่โหลด Component ที่ไม่จำเป็น
+
+ตัวเลข Performance ที่แน่นอนต้องกำหนดหลังจากมี Benchmark และข้อมูลการใช้งานจริง
+
+## 21.2 Reliability
+
+ระบบต้องรองรับ:
+- Network Failure
+- Request Retry
+- Save Failure
+- Concurrent Updates
+- Storage Failure
+- Provider Failure
+- Rate Limit
+- Session Expiration
+
+## 21.3 Conflict Handling
+
+หากไฟล์ถูกแก้ไขจากหลาย Session:
+
+- ตรวจสอบ Version หรือ Content Hash
+- ตรวจจับ Stale Update
+- แจ้งเตือนผู้ใช้
+- ป้องกันการเขียนทับข้อมูลใหม่โดยไม่ตั้งใจ
+- เตรียมระบบ Conflict Resolution
+
+---
+
+# 22. VERSION HISTORY & BACKUP
+
+## 22.1 Version History
+
+ควรมีประวัติการเปลี่ยนแปลงเนื้อหา
+
+Requirements:
+- เก็บ Version Number
+- เก็บ Timestamp
+- เก็บ Content Hash
+- เก็บ R2 Object Reference
+- เปิดดู Version เก่าได้
+- Restore Version เก่าได้
+- จำกัดการสร้าง Version ที่ซ้ำโดยไม่มีความจำเป็น
+
+## 22.2 Version Strategy
+
+แนะนำ:
+- Auto Save สำหรับ Current Content
+- Version Snapshot ตามช่วงเวลา หรือเมื่อมีการเปลี่ยนแปลงที่มีนัยสำคัญ
+- Manual Snapshot
+- Restore จาก Version เก่า
+
+การย้ายไฟล์หรือเปลี่ยนชื่อไม่ควรสร้าง Content Version ใหม่
+
+## 22.3 Backup
+
+ต้องมีแผน:
+- Workspace Export
+- Database Backup
+- R2 Data Recovery
+- Recovery Procedure
+- Export Format Documentation
+
+---
+
+# 23. IMPORT & EXPORT
+
+## 23.1 Import
+
+รองรับ:
+- Markdown Files
+- Folder Structures
+- ZIP Archives
+- Attachments
+- YAML Frontmatter
+
+ควรพิจารณา Obsidian Vault Import เป็น Use Case สำคัญ
+
+Requirements:
+- Preserve Folder Structure
+- Preserve Markdown Content
+- Preserve Attachments
+- Preserve Internal Links เมื่อทำได้
+- Handle Duplicate Names
+- Show Import Report
+
+## 23.2 Export
+
+รองรับ:
+- Export Single File
+- Export Folder
+- Export Entire Workspace
+- Export as ZIP
+- Export Markdown
+- Export Attachments
+
+ผู้ใช้ควรสามารถนำข้อมูลออกไปใช้กับระบบอื่นได้โดยไม่ถูกล็อกอยู่ในแพลตฟอร์ม
+
+---
+
+# 24. NON-FUNCTIONAL REQUIREMENTS
+
+| ID | Category | Requirement | Priority |
+|---|---|---|---|
+| NFR-01 | Security | Authentication | Must |
+| NFR-02 | Security | Workspace Isolation | Must |
+| NFR-03 | Security | AI Read-only Enforcement | Must |
+| NFR-04 | Security | Secure API Key Storage | Must |
+| NFR-05 | Performance | Lazy Loading | Must |
+| NFR-06 | Performance | Search Pagination | Must |
+| NFR-07 | Reliability | Auto Save Recovery | Must |
+| NFR-08 | Reliability | Error Handling | Must |
+| NFR-09 | UX | Responsive Layout | Must |
+| NFR-10 | UX | Keyboard Navigation | Should |
+| NFR-11 | Data | Version History | Should |
+| NFR-12 | Data | Export | Must |
+| NFR-13 | Data | Backup Strategy | Must |
+| NFR-14 | Accessibility | Keyboard Support | Should |
+| NFR-15 | Extensibility | Provider Adapter | Must |
+| NFR-16 | Extensibility | Modular Architecture | Must |
+
+---
+
+# 25. FUNCTIONAL REQUIREMENTS MASTER LIST
+
+Priority Definition:
+
+- Must: จำเป็นต่อการเปิดใช้งานผลิตภัณฑ์
+- Should: ควรมีในช่วงแรก แต่สามารถจัดลำดับภายหลัง
+- Could: ความสามารถเพิ่มเติม
+- Future: ระยะพัฒนาถัดไป
+
+## 25.1 Authentication & Workspace
+
+| ID | Requirement | Priority |
+|---|---|---|
+| AUTH-01 | Register | Must |
+| AUTH-02 | Login | Must |
+| AUTH-03 | Logout | Must |
+| AUTH-04 | Session Management | Must |
+| WS-01 | Create Workspace | Must |
+| WS-02 | Rename Workspace | Must |
+| WS-03 | Delete Workspace | Must |
+| WS-04 | Switch Workspace | Must |
+| WS-05 | Workspace Settings | Must |
+| WS-06 | Workspace Isolation | Must |
+| WS-07 | Workspace Export | Must |
+
+## 25.2 File System
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FS-01 | Create Folder | Must |
+| FS-02 | Create Subfolder | Must |
+| FS-03 | Create File | Must |
+| FS-04 | Rename File | Must |
+| FS-05 | Rename Folder | Must |
+| FS-06 | Move File | Must |
+| FS-07 | Move Folder | Must |
+| FS-08 | Multi-file Move | Must |
+| FS-09 | Drag & Drop | Must |
+| FS-10 | Cut & Paste | Should |
+| FS-11 | Context Menu | Must |
+| FS-12 | Move to Root | Must |
+| FS-13 | Move from Root | Must |
+| FS-14 | Move Across Parent Folders | Must |
+| FS-15 | Undo Move | Should |
+| FS-16 | Preserve IDs | Must |
+| FS-17 | Preserve Internal Links | Must |
+| FS-18 | Soft Delete | Must |
+| FS-19 | Restore | Must |
+| FS-20 | Permanent Delete | Must |
+| FS-21 | Mobile File Operations | Must |
+| FS-22 | Cross-Workspace Move | Future |
+
+## 25.3 Editor
+
+| ID | Requirement | Priority |
+|---|---|---|
+| ED-01 | Markdown Editor | Must |
+| ED-02 | Live Preview | Must |
+| ED-03 | Source Mode | Must |
+| ED-04 | Auto Save | Must |
+| ED-05 | YAML Frontmatter | Must |
+| ED-06 | Internal Links | Must |
+| ED-07 | Backlinks | Must |
+| ED-08 | Outline | Should |
+| ED-09 | Tags | Must |
+| ED-10 | Callouts | Should |
+| ED-11 | Math / LaTeX | Could |
+| ED-12 | Tables | Must |
+| ED-13 | Images | Must |
+| ED-14 | Search & Replace | Should |
+| ED-15 | Word Count | Must |
+| ED-16 | Tabs | Should |
+| ED-17 | Mobile Editing | Must |
+
+## 25.4 Knowledge Management
+
+| ID | Requirement | Priority |
+|---|---|---|
+| KM-01 | Note Templates | Must |
+| KM-02 | Knowledge Base | Must |
+| KM-03 | Character Management | Should |
+| KM-04 | Worldbuilding | Should |
+| KM-05 | Story Planning | Should |
+| KM-06 | Timeline | Should |
+| KM-07 | Promise / Oath Tracking | Could |
+| KM-08 | Quest / Task Tracking | Could |
+| KM-09 | Event Logs | Should |
+| KM-10 | Relationship Management | Could |
+
+## 25.5 AI
+
+| ID | Requirement | Priority |
+|---|---|---|
+| AI-01 | AI Chat | Must |
+| AI-02 | Provider Management | Must |
+| AI-03 | Model Selection | Must |
+| AI-04 | API Key Management | Must |
+| AI-05 | Workspace Instructions | Must |
+| AI-06 | Read-only Retrieval | Must |
+| AI-07 | Workspace Isolation | Must |
+| AI-08 | Source Citations | Must |
+| AI-09 | Chat History | Must |
+| AI-10 | Manual Context Attachment | Should |
+| AI-11 | Streaming Response | Must |
+| AI-12 | Semantic Search | Future |
+| AI-13 | Continuity Analysis | Should |
+| AI-14 | Cross-file Analysis | Should |
+| AI-15 | AI Write Permissions | Not Allowed |
+
+---
+
+# 26. USER FLOWS
+
+## 26.1 First-time User
+
+```text
+Visit Application
+      │
+      ▼
+Register / Login
+      │
+      ▼
+Create Workspace
+      │
+      ▼
+Open Workspace
+      │
+      ▼
+View Empty File Explorer
+      │
+      ▼
+Create First Folder / File
+      │
+      ▼
+Start Writing
+```
+
+## 26.2 Create and Edit File
+
+```text
+Open Workspace
+      │
+      ▼
+Create File
+      │
+      ▼
+Open Editor
+      │
+      ▼
+Write Markdown
+      │
+      ▼
+Auto Save
+      │
+      ▼
+Update File Metadata
+```
+
+## 26.3 Move Folder
+
+```text
+Select Folder
+      │
+      ▼
+Choose Move To
+      │
+      ▼
+Select Destination
+      │
+      ▼
+Validate Destination
+      │
+      ▼
+Check Duplicate Names
+      │
+      ▼
+Commit Transaction
+      │
+      ▼
+Refresh File Tree
+      │
+      ▼
+Record Operation Log
+```
+
+## 26.4 Ask AI About Workspace
+
+```text
+Open AI Assistant
+      │
+      ▼
+Select Provider / Model
+      │
+      ▼
+Enter Question
+      │
+      ▼
+Resolve Active Workspace
+      │
+      ▼
+Load Instructions
+      │
+      ▼
+Retrieve Relevant Files
+      │
+      ▼
+AI Analysis
+      │
+      ▼
+Display Answer + Sources
+```
+
+---
+
+# 27. ACCEPTANCE CRITERIA
+
+## 27.1 Workspace
+
+- ผู้ใช้สามารถสร้าง Workspace ได้
+- Workspace มี Root เป็นของตัวเอง
+- Workspace แต่ละรายการมีข้อมูลแยกกัน
+- ผู้ใช้สลับ Workspace ได้
+- การสลับ Workspace ต้องไม่แสดงข้อมูลเก่าที่ไม่เกี่ยวข้อง
+
+## 27.2 File System
+
+- ผู้ใช้สร้าง Folder ใน Root ได้
+- ผู้ใช้สร้าง Subfolder ได้
+- ผู้ใช้สร้าง File ในทุกระดับได้
+- ผู้ใช้ย้าย File จาก Root เข้า Folder ได้
+- ผู้ใช้ย้าย File จาก Folder กลับ Root ได้
+- ผู้ใช้ย้าย Folder จาก Root ไปยัง Subfolder ได้
+- ผู้ใช้ย้าย Folder กลับ Root ได้
+- ผู้ใช้ย้าย Folder ข้าม Parent Folder ได้
+- การย้าย Folder ต้องรักษาโครงสร้างภายในทั้งหมด
+- การย้ายต้องไม่เปลี่ยน File ID หรือ Folder ID
+- ระบบต้องป้องกัน Circular Folder Reference
+- ระบบต้องแจ้งเตือนเมื่อชื่อซ้ำ
+- ระบบต้องรองรับการ Undo Move ตาม Operation Log
+
+## 27.3 Editor
+
+- เปิด Markdown File ได้
+- แก้ไข Markdown ได้
+- Auto Save ทำงานได้
+- แสดง Save Status ได้
+- รองรับ YAML
+- รองรับ Internal Links
+- แสดง Backlinks
+- เปิดไฟล์ที่เชื่อมโยงได้
+- รองรับ Mobile Editing
+
+## 27.4 AI
+
+- AI ค้นหาไฟล์ใน Workspace ปัจจุบันได้
+- AI อ่านไฟล์ได้
+- AI วิเคราะห์ไฟล์ได้
+- AI อ้างอิง Source ได้
+- AI ไม่สามารถสร้างไฟล์ได้
+- AI ไม่สามารถแก้ไขไฟล์ได้
+- AI ไม่สามารถลบไฟล์ได้
+- AI ไม่สามารถย้ายไฟล์ได้
+- AI ไม่สามารถอ่าน Workspace อื่นได้
+- การเปลี่ยน Workspace ต้องเปลี่ยน Retrieval Scope
+- Backend ต้องปฏิเสธ Write Operations ที่ AI พยายามเรียก
+
+---
+
+# 28. DEVELOPMENT ROADMAP
+
+## Phase 1 – Foundation & Core Workspace
+
+เป้าหมาย: สร้างระบบพื้นฐานที่ใช้งานได้จริง
+
+Features:
+- Project Setup
+- Authentication
+- Workspace Management
+- Cloudflare Workers
+- D1 Database
+- R2 Storage
+- File Explorer
+- Folder CRUD
+- File CRUD
+- Move Operations
+- Root Navigation
+- Markdown Editor
+- Auto Save
+- Responsive Layout
+
+Deliverable:
+ผู้ใช้สามารถสร้าง Workspace จัดการไฟล์ และเขียน Markdown บน Cloud ได้
+
+## Phase 2 – Obsidian-like Experience
+
+Features:
+- Internal Links
+- Backlinks
+- Properties
+- Tags
+- Search
+- Quick Switcher
+- Tabs
+- Outline
+- Context Menu
+- Drag & Drop
+- Mobile File Operations
+- Dark / Light Theme
+
+Deliverable:
+ระบบจดบันทึกและเชื่อมโยงข้อมูลที่ใช้งานได้คล้าย Knowledge Workspace
+
+## Phase 3 – Knowledge Management
+
+Features:
+- Note Templates
+- Inbox
+- Journal
+- Writing Log
+- Knowledge Base
+- Character Templates
+- Worldbuilding
+- Timeline
+- Event Log
+- Promise / Oath
+- Quest / Task
+- Entity Relationships
+
+Deliverable:
+ระบบจัดการองค์ความรู้และข้อมูลสำหรับนักเขียนและผู้ใช้งานทั่วไป
+
+## Phase 4 – AI Provider Management
+
+Features:
+- Provider Configuration
+- API Key Encryption
+- Model Discovery
+- Model Selection
+- Connection Testing
+- Provider Adapter
+- Default Model Settings
+
+Deliverable:
+ผู้ใช้เชื่อมต่อ AI Provider ของตัวเองได้
+
+## Phase 5 – AI Knowledge Assistant
+
+Features:
+- AI Chat
+- Workspace Instructions
+- Retrieval Tools
+- Read-only Permissions
+- Keyword Retrieval
+- Context Attachment
+- Source Citations
+- Chat History
+- Streaming
+
+Deliverable:
+AI สามารถอ่านและวิเคราะห์ข้อมูลใน Workspace ปัจจุบันได้อย่างปลอดภัย
+
+## Phase 6 – Advanced Features
+
+Features:
+- Semantic Search
+- Vectorize
+- Advanced Graph View
+- Version History
+- Workspace Import / Export
+- Advanced Backup
+- Offline Support
+- Realtime Sync
+- Collaborative Workspace
+- Advanced Analytics
+
+Deliverable:
+แพลตฟอร์ม Knowledge & Writing Workspace ที่สมบูรณ์และขยายต่อได้
+
+---
+
+# 29. MVP DEFINITION
+
+MVP ต้องมีความสามารถเพียงพอให้ผู้ใช้เริ่มใช้งานเป็นพื้นที่ทำงานจริงได้
+
+## MVP Must-have
+
+1. Authentication
+2. Create / Manage Workspace
+3. Workspace Isolation
+4. Root File System
+5. Folder / Subfolder
+6. File Create / Edit / Delete
+7. Rename
+8. Move File
+9. Move Folder
+10. Move to Root
+11. Move from Root
+12. Multi-file Move
+13. Drag & Drop
+14. Markdown Editor
+15. Auto Save
+16. YAML Frontmatter
+17. Internal Links
+18. Basic Search
+19. Mobile Responsive
+20. AI Provider Configuration
+21. AI Chat
+22. AI Read-only Retrieval
+23. Workspace Instructions
+24. Source Citations
+25. Secure API Key Storage
+26. Workspace Export
+
+## MVP Should-have
+
+- Backlinks
+- Quick Switcher
+- Tabs
+- Templates
+- Trash / Restore
+- Version History
+- Chat History
+- Context Attachment
+
+## MVP Exclusions
+
+- Realtime Collaboration
+- Offline-first Sync
+- Advanced Graph
+- Semantic Search
+- Plugin Marketplace
+- Cross-Workspace Move
+
+---
+
+# 30. SUCCESS METRICS
+
+## Product Metrics
+
+- จำนวน Workspace ที่ถูกสร้าง
+- จำนวนไฟล์ต่อ Workspace
+- จำนวนผู้ใช้ที่กลับมาใช้งาน
+- จำนวน Notes ที่สร้าง
+- จำนวนครั้งที่เปิด Editor
+- จำนวน Move Operations
+- จำนวนไฟล์ที่เชื่อมโยงกัน
+
+## AI Metrics
+
+- จำนวน AI Sessions
+- จำนวนคำถามต่อ Session
+- Retrieval Success Rate
+- Citation Coverage
+- Average Response Time
+- Provider Error Rate
+- AI Cost per User
+
+## Reliability Metrics
+
+- Auto Save Success Rate
+- File Recovery Success Rate
+- API Error Rate
+- Search Latency
+- Workspace Load Time
+
+---
+
+# 31. RISKS & MITIGATION
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Data Loss | Critical | Auto Save, Versioning, Backup |
+| Workspace Leakage | Critical | Strict Tenant Isolation |
+| AI Prompt Injection | High | Tool Permissions, Untrusted Context |
+| API Key Exposure | Critical | Encryption, Secrets |
+| Large Workspace | High | Pagination, Lazy Loading |
+| Concurrent Editing | High | Version Checks, Conflict Handling |
+| Broken Internal Links | High | Stable File IDs |
+| R2 Storage Cost | Medium | Storage Monitoring |
+| AI API Cost | Medium | Usage Tracking, Context Limits |
+| Mobile UX Complexity | Medium | Mobile-first Testing |
+
+---
+
+# 32. ARCHITECTURAL DECISIONS
+
+ข้อกำหนดที่ถือเป็นหลักในการออกแบบระบบ:
+
+1. Workspace คือพื้นที่ทำงานหลัก ไม่ใช่ Folder
+2. แต่ละ Workspace มี Root `/` ของตัวเอง
+3. File System ใช้ Tree Structure
+4. `parent_id = NULL` หมายถึง Root
+5. File และ Folder ต้องมี Stable ID
+6. File Content จัดเก็บใน R2
+7. Metadata จัดเก็บใน D1
+8. Rename และ Move ต้องไม่บังคับย้าย R2 Object
+9. Internal Links ควรอ้างอิง File ID เป็นหลัก
+10. AI ต้องใช้ Read-only Tools เท่านั้น
+11. AI Retrieval ต้องถูกจำกัดด้วย Active Workspace
+12. Provider API Keys ต้องถูกเข้ารหัส
+13. Frontend ต้องเป็น Mobile-first
+14. ระบบต้องรองรับ Markdown เป็นรูปแบบหลัก
+15. ผู้ใช้มีอิสระในการจัดโครงสร้าง Workspace
+16. การลบข้อมูลต้องมี Recovery Strategy
+17. Cross-Workspace Operations ต้องแยกจาก Workspace Operations ปกติ
+18. ระบบต้องออกแบบแบบ Modular และรองรับการเพิ่ม Feature ในอนาคต
+
+---
+
+# 33. OPEN PRODUCT DECISIONS
+
+ประเด็นที่ยังต้องยืนยันก่อนกำหนด Technical Specification ฉบับ Implementation
+
+## 33.1 Editor Mode
+
+ข้อเสนอเริ่มต้น:
+- Live Preview เป็นค่าเริ่มต้น
+- รองรับ Source Mode
+- สามารถเปลี่ยนโหมดได้
+
+## 33.2 Offline Support
+
+ข้อเสนอเริ่มต้น:
+- MVP ใช้งาน Online-first
+- วางโครงสร้างให้รองรับ Local Draft และ Offline Sync ในอนาคต
+- ยังไม่ต้องทำ Full Offline Sync ใน MVP
+
+## 33.3 AI Provider Architecture
+
+ข้อเสนอเริ่มต้น:
+- Gemini Native API
+- OpenAI-compatible API
+- Provider Adapter Architecture
+- รองรับ Custom Base URL
+
+## 33.4 Workspace Ownership
+
+ข้อเสนอเริ่มต้น:
+- Private Workspace
+- Single Owner
+- เตรียม Database Structure สำหรับ Shared Workspace ในอนาคต
+
+## 33.5 Version History
+
+ข้อเสนอเริ่มต้น:
+- Auto Save สำหรับ Current Content
+- Snapshot Version อัตโนมัติตามเงื่อนไข
+- Manual Snapshot
+- Restore Version
+
+## 33.6 File Format
+
+ข้อเสนอเริ่มต้น:
+- Markdown เป็น Native Format
+- YAML Frontmatter สำหรับ Metadata
+- Attachments แยกจัดเก็บใน R2
+- รองรับ Import / Export Markdown
+
+## 33.7 AI Memory
+
+ข้อเสนอเริ่มต้น:
+- AI ไม่ใช้ Cross-Workspace Memory
+- Workspace Instructions แยกกัน
+- Chat History แยกตาม Workspace
+- Retrieved Content ใช้เฉพาะคำถามปัจจุบันและ Context ที่เกี่ยวข้อง
+- ไม่ให้ AI สร้างความจำข้าม Workspace โดยอัตโนมัติ
+
+---
+
+# 34. FINAL PRODUCT DEFINITION
+
+Cloud-based Knowledge & Writing Workspace คือแพลตฟอร์มสำหรับสร้าง จัดเก็บ จัดระเบียบ และเชื่อมโยงองค์ความรู้ผ่านระบบ Workspace ที่มี File System แบบอิสระ พร้อม Markdown Editor และ AI Knowledge Assistant ที่สามารถอ่านและวิเคราะห์ข้อมูลภายใน Workspace ปัจจุบันได้อย่างปลอดภัย
+
+ระบบต้องไม่จำกัดผู้ใช้ไว้กับโครงสร้าง Folder ที่กำหนดตายตัว ผู้ใช้สามารถสร้าง Folder, Subfolder, File, เปลี่ยนชื่อ ย้ายข้อมูล และจัดโครงสร้างใหม่ได้ตามต้องการ รวมถึงย้ายข้อมูลเข้าและออกจาก Root `/` ได้อย่างอิสระ
+
+AI เป็นผู้ช่วยด้านการค้นหาและวิเคราะห์ข้อมูล ไม่ใช่ผู้จัดการไฟล์หรือผู้แก้ไขข้อมูลโดยอัตโนมัติ
+
+ข้อมูลต้องเป็นของผู้ใช้ สามารถส่งออกได้ และไม่ถูกผูกติดกับ AI Provider รายใดรายหนึ่ง
+
+**Core Product Identity:**
+
+- Workspace-centric
+- File-system-based
+- Markdown-first
+- Knowledge-oriented
+- AI-assisted
+- Cloud-native
+- Mobile-first
+- User-owned
+
+**Product Vision:**
+
+สร้างพื้นที่ทำงานที่ผู้ใช้สามารถเก็บความคิด ความรู้ และผลงานทั้งหมดไว้ในระบบเดียว โดยมีอิสระในการจัดการข้อมูล และมี AI เป็นผู้ช่วยที่เข้าใจสิ่งที่ผู้ใช้สร้างขึ้น โดยไม่夺สิทธิ์ในการควบคุมข้อมูลจากผู้ใช้
+
+---
+
+**END OF PRODUCT REQUIREMENTS DOCUMENT**
+
+**Version 1.0 – Draft**

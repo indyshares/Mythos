@@ -1,0 +1,25 @@
+{
+  "sessions": [
+    {
+      "id": "sess-1",
+      "title": "Test Session",
+      "messages": [],
+      "workspaceId": "test-ws-e2e"
+    }
+  ],
+  "contexts": {
+    "ws-dust-of-sorcery": {
+      "manualContextIds": [],
+      "instructions": "# Workspace Instructions\n\n- สวมบทบาทเป็นผู้ช่วยนักเขียนนิยายระดับมืออาชีพ\n- ใช้ภาษาไทยสละสลวย บรรยายอารมณ์และฉากอย่างมีชีวิตชีวา\n- พัฒนาบทสนทนาให้มีเอกลักษณ์และเป็นธรรมชาติ",
+      "updatedAt": "2026-11-07T11:22:57.360Z"
+    },
+    "test-ws-e2e": {
+      "manualContextIds": [
+        "f-1"
+      ],
+      "instructions": "Test instructions",
+      "updatedAt": "2026-11-07T11:54:10.887Z"
+    }
+  },
+  "lastSyncedAt": null
+}

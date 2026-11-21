@@ -1,0 +1,6 @@
+{
+  "name": "Mythos - Cloud Knowledge & Writing Workspace",
+  "description": "Cloud-based Knowledge Management & Writing Workspace with hierarchical file system, Markdown live editor, internal links, graph, story timeline, and multi-provider AI Knowledge Assistant with read-only retrieval.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
