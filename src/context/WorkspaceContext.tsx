@@ -183,7 +183,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ACTIVE_WS);
-    return saved || 'ws-dust-of-sorcery';
+    return saved || '';
   });
 
   const [folders, setFolders] = useState<Folder[]>(() => {
@@ -195,24 +195,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const saved = localStorage.getItem(STORAGE_KEYS.FILES);
     if (!saved) return INITIAL_FILES;
     try {
-      const parsed: FileItem[] = JSON.parse(saved);
-      if (!parsed.some(f => f.id === 'file-android-spec' || f.name === 'ANDROID_APP_SPECIFICATION.md')) {
-        const specItem = INITIAL_FILES.find(f => f.id === 'file-android-spec');
-        if (specItem) {
-          return [specItem, ...parsed];
-        }
-      }
-      return parsed;
+      return JSON.parse(saved);
     } catch {
       return INITIAL_FILES;
     }
   });
 
-  const [activeFileId, setActiveFileId] = useState<string | null>('file-overview');
-  const [tabs, setTabs] = useState<TabItem[]>([
-    { fileId: 'file-overview' },
-    { fileId: 'file-lucia' },
-  ]);
+  const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [tabs, setTabs] = useState<TabItem[]>([]);
 
   const [instructionsMap, setInstructionsMap] = useState<Record<string, WorkspaceInstructions>>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.INSTRUCTIONS);
@@ -426,8 +416,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return (
       workspaces.find((w) => w.id === activeWorkspaceId) ||
       workspaces[0] || {
-        id: 'default',
-        name: 'Default Workspace',
+        id: '',
+        name: '',
         description: '',
         icon: 'Folder',
         createdAt: new Date().toISOString(),

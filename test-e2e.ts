@@ -1,16 +1,22 @@
 /**
  * Comprehensive End-to-End (E2E) Test Suite for Mythos Workspace
- * Runs against the local environment and live dev server on port 3000.
+ * Runs against an isolated dev server on port 3001 with temp storage,
+ * so tests never read or write real workspace data.
  */
 
 import { JSDOM } from 'jsdom';
 import JSZip from 'jszip';
 import { spawn, type ChildProcess } from 'node:child_process';
+import os from 'node:os';
+import path from 'node:path';
 import { parseMarkdown, serializeMarkdown, extractInternalLinks, extractHeadings, calculateStats } from './src/utils/markdownParser';
+
+const BASE_URL = 'http://localhost:3001';
+const TEST_STORAGE_FILE = path.join(os.tmpdir(), 'mythos-test-storage.json');
 
 // Set up JSDOM global browser environment
 const dom = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>', {
-  url: 'http://localhost:3000',
+  url: BASE_URL + '/',
 });
 (global as any).window = dom.window;
 (global as any).document = dom.window.document;
@@ -37,7 +43,7 @@ let ownedServer: ChildProcess | null = null;
 
 async function pingServer(): Promise<boolean> {
   try {
-    const response = await fetch('http://localhost:3000/api/health');
+    const response = await fetch(BASE_URL + '/api/health');
     return response.ok;
   } catch {
     return false;
@@ -50,13 +56,14 @@ async function ensureServer(): Promise<void> {
   ownedServer = spawn(process.execPath, ['--import', 'tsx', 'server.ts'], {
     cwd: process.cwd(),
     stdio: 'ignore',
+    env: { ...process.env, PORT: '3001', MYTHOS_STORAGE_FILE: TEST_STORAGE_FILE },
   });
   for (let attempt = 0; attempt < 80; attempt++) {
     if (await pingServer()) return;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   stopOwnedServer();
-  throw new Error('Dev server did not start on http://localhost:3000');
+  throw new Error('Test server did not start on ' + BASE_URL);
 }
 
 function stopOwnedServer(): void {
@@ -74,9 +81,9 @@ async function runTestSuite() {
   // ==========================================
   // SUITE 1: Backend API End-to-End Tests
   // ==========================================
-  console.log('🔷 Suite 1: Backend HTTP APIs (Live Server Port 3000)');
+  console.log('🔷 Suite 1: Backend HTTP APIs (Isolated Test Server Port 3001)');
   try {
-    const healthRes = await fetch('http://localhost:3000/api/health');
+    const healthRes = await fetch(BASE_URL + '/api/health');
     const healthJson = await healthRes.json() as any;
     assert(healthRes.status === 200, 'GET /api/health responds with 200 OK');
     assert(healthJson.status === 'ok', 'Health status is "ok"');
@@ -86,7 +93,7 @@ async function runTestSuite() {
   }
 
   try {
-    const syncRes = await fetch('http://localhost:3000/api/database/sync', {
+    const syncRes = await fetch(BASE_URL + '/api/database/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -106,7 +113,7 @@ async function runTestSuite() {
   }
 
   try {
-    const historyRes = await fetch('http://localhost:3000/api/database/chat-history');
+    const historyRes = await fetch(BASE_URL + '/api/database/chat-history');
     const historyJson = await historyRes.json() as any;
     assert(historyRes.status === 200, 'GET /api/database/chat-history returns 200');
     assert(Array.isArray(historyJson.sessions), 'Chat history returns array of sessions');
@@ -115,7 +122,7 @@ async function runTestSuite() {
   }
 
   try {
-    const aiTestRes = await fetch('http://localhost:3000/api/ai/test-connection', {
+    const aiTestRes = await fetch(BASE_URL + '/api/ai/test-connection', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -130,7 +137,7 @@ async function runTestSuite() {
   }
 
   try {
-    const chatErrorRes = await fetch('http://localhost:3000/api/ai/chat', {
+    const chatErrorRes = await fetch(BASE_URL + '/api/ai/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

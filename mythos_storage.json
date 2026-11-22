@@ -1,20 +1,5 @@
 {
-  "sessions": [
-    {
-      "id": "sess-1",
-      "title": "Test Session",
-      "messages": [],
-      "workspaceId": "test-ws-e2e"
-    }
-  ],
-  "contexts": {
-    "test-ws-e2e": {
-      "manualContextIds": [
-        "f-1"
-      ],
-      "instructions": "Test instructions",
-      "updatedAt": "2026-11-22T08:17:20.081Z"
-    }
-  },
+  "sessions": [],
+  "contexts": {},
   "lastSyncedAt": null
 }

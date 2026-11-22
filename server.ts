@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+const port = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -117,7 +117,9 @@ function formatFriendlyErrorMessage(error: any): string {
 }
 
 // Local JSON Storage State
-const LOCAL_DB_FILE = path.join(__dirname, 'mythos_storage.json');
+const LOCAL_DB_FILE = process.env.MYTHOS_STORAGE_FILE
+  ? path.resolve(process.env.MYTHOS_STORAGE_FILE)
+  : path.join(__dirname, 'mythos_storage.json');
 let cachedDatabaseState: any = {
   sessions: [],
   contexts: {},
