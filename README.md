@@ -252,7 +252,7 @@ Because the test setup depends on live browser/server behavior and external prov
 
 ## License
 
-See [`LICENSE.txt`](LICENSE.txt) for the repository license.
+The original Mythos application and server source code maintained by IndyShares is licensed under **GNU GPL v3 or later**. This software license does not apply to user-created content, third-party dependencies, or non-code assets unless a separate notice expressly says otherwise. See [`LICENSE.txt`](LICENSE.txt) for the complete license and scope details.
 
 ## Links
 
