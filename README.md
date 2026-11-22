@@ -60,6 +60,35 @@ Or, with Bun:
 bun install
 ```
 
+## Releases and Downloads
+
+Pre-built installers are published on the [releases page](https://github.com/indyshares/Mythos/releases).
+Latest release: [v0.1.0](https://github.com/indyshares/Mythos/releases/tag/v0.1.0).
+
+Download all assets of a release with the GitHub CLI:
+
+```bash
+gh release download v0.1.0 -D installers
+```
+
+| Platform | Asset | Install |
+|---|---|---|
+| Windows | `Mythos_0.1.0_x64-setup.exe` | Run the installer (NSIS, per-user install). |
+| macOS (Intel) | `Mythos_0.1.0_x64.dmg` | Open the DMG and drag Mythos to Applications. |
+| macOS (Apple Silicon) | `Mythos_0.1.0_aarch64.dmg` | Same as above; pick this on M-series Macs. |
+| Linux (Debian/Ubuntu) | `Mythos_0.1.0_amd64.deb` | `sudo apt install ./Mythos_0.1.0_amd64.deb` |
+| Linux (portable) | `Mythos_0.1.0_amd64.AppImage` | `chmod +x Mythos_0.1.0_amd64.AppImage && ./Mythos_0.1.0_amd64.AppImage` |
+| Android | `Mythos-v0.1.0.apk` | Copy to device and install (allow unknown sources). |
+| Android (store) | `Mythos-v0.1.0.aab` | For Google Play; unsigned until signing secrets are configured. |
+
+macOS may require right-click → Open on first launch because the binary is not notarized.
+For the web version, or to run from source: `npm run dev` → http://localhost:3000.
+
+CI build artifacts for every push are also available under the repository
+[Actions runs](https://github.com/indyshares/Mythos/actions/workflows/build-all.yml); download them with
+`gh run download <run-id> -D installers`. Desktop and Android builds store workspace content as real
+folders and `.md` files under `Documents/Mythos`.
+
 ## Environment Variables
 
 Create a local environment file:
@@ -318,4 +347,6 @@ The original Mythos application and server source code maintained by IndyShares 
 ## Links
 
 - Repository: https://github.com/indyshares/Mythos
+- Releases and downloads: https://github.com/indyshares/Mythos/releases
+- CI build artifacts: https://github.com/indyshares/Mythos/actions/workflows/build-all.yml
 - Thai documentation: [README_TH.md](README_TH.md)

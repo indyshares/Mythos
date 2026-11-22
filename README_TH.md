@@ -102,6 +102,31 @@ NODE_ENV=production npm start
 
 เมื่อทำงานใน Production Mode, Express จะให้บริการไฟล์ที่สร้างขึ้นในโฟลเดอร์ dist/ และเปิดรับการเชื่อมต่อผ่านพอร์ต 3000
 
+การดาวน์โหลด ติดตั้ง และ Release (Releases and Downloads)
+
+ไฟล์ติดตั้งที่สร้างไว้ล่วงหน้าอยู่ที่หน้า Releases: https://github.com/indyshares/Mythos/releases
+Release ล่าสุดคือ v0.1.0: https://github.com/indyshares/Mythos/releases/tag/v0.1.0
+
+ดาวน์โหลดไฟล์ทั้งหมดของ Release ด้วย GitHub CLI:
+bash
+gh release download v0.1.0 -D installers
+
+แพลตฟอร์ม	ไฟล์	วิธีติดตั้ง
+Windows	Mythos_0.1.0_x64-setup.exe	รันไฟล์ติดตั้ง (NSIS ติดตั้งต่อผู้ใช้)
+macOS (Intel)	Mythos_0.1.0_x64.dmg	เปิดไฟล์ DMG แล้วลาก Mythos ไปยัง Applications
+macOS (Apple Silicon)	Mythos_0.1.0_aarch64.dmg	ใช้ไฟล์นี้บนเครื่อง M-series วิธีเดียวกับด้านบน
+Linux (Debian/Ubuntu)	Mythos_0.1.0_amd64.deb	sudo apt install ./Mythos_0.1.0_amd64.deb
+Linux (พกพา)	Mythos_0.1.0_amd64.AppImage	chmod +x Mythos_0.1.0_amd64.AppImage && ./Mythos_0.1.0_amd64.AppImage
+Android	Mythos-v0.1.0.apk	คัดลอกไปยังเครื่องและติดตั้ง (อนุญาตแหล่งที่ไม่รู้จัก)
+Android (สโตร์)	Mythos-v0.1.0.aab	สำหรับ Google Play ยังไม่เซ็นชื่อจนกว่าจะตั้งค่า signing secrets
+
+บน macOS อาจต้องคลิกขวา → Open ในครั้งแรกเนื่องจากแอปยังไม่ได้ notarize
+สำหรับเว็บแอปหรือการรันจากซอร์ส: npm run dev แล้วเปิด http://localhost:3000
+
+Artifact ของทุก Build อยู่ที่หน้า Actions: https://github.com/indyshares/Mythos/actions/workflows/build-all.yml
+ดาวน์โหลดด้วยคำสั่ง gh run download <run-id> -D installers
+แอป Desktop และ Android เก็บพื้นที่ทำงานเป็นโฟลเดอร์และไฟล์ .md จริงอยู่ที่ Documents/Mythos
+
 ผู้ช่วย AI ด้านองค์ความรู้ (AI Knowledge Assistant)
 
 เซิร์ฟเวอร์รองรับการกำหนดค่าผู้ให้บริการ AI ได้หลายรูปแบบ ดังนี้:
@@ -237,4 +262,6 @@ git switch -c feature/my-feature
 ดูข้อความสัญญาอนุญาตฉบับเต็มและขอบเขตการใช้งานได้ที่ [LICENSE.txt](LICENSE.txt)
 ลิงก์ที่เกี่ยวข้อง (Links)
 Repository: https://github.com/indyshares/Mythos
+Release และดาวน์โหลด: https://github.com/indyshares/Mythos/releases
+Artifact จาก CI: https://github.com/indyshares/Mythos/actions/workflows/build-all.yml
 เอกสารภาษาไทย: README_TH.md
