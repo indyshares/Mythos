@@ -244,7 +244,7 @@ Mythos targets web, Android (Capacitor 8) and desktop (Tauri v2: Windows, macOS,
 Host prerequisites:
 
 - **Desktop**: Rust via [rustup](https://rustup.rs), plus platform toolchains — Windows: MSVC Build Tools + WebView2 Runtime; macOS: `xcode-select --install`; Linux (Ubuntu/Debian): `libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`.
-- **Android**: JDK 17 and Android SDK (`ANDROID_HOME`/`ANDROID_SDK_ROOT`), or Android Studio.
+- **Android**: JDK 21 (required by Capacitor 8 plugins) and Android SDK (`ANDROID_HOME`/`ANDROID_SDK_ROOT`), or Android Studio.
 
 Commands:
 
@@ -271,6 +271,15 @@ if ((await checkPermission('files')) !== 'granted') {
 const folder = await pickDirectory(); // null when cancelled/unsupported
 await requestPermission('notifications');
 ```
+
+Clearing app data:
+
+```ts
+import { clearLocalAppData } from './utils/resetAppData';
+await clearLocalAppData(); // clears Mythos localStorage, idb-keyval and PWA caches, then reloads
+```
+
+Manual equivalent in DevTools: Application → Local Storage → remove all `mythos_*` keys, Application → IndexedDB → delete `keyval-store`, Application → Storage → Clear site data. Server-side data lives in `mythos_storage.json` and `data/chat_history.json`; both are reset to empty sessions/contexts in the repo.
 
 Build outputs (all relative to the repo root):
 

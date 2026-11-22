@@ -5,6 +5,7 @@
 
 import { JSDOM } from 'jsdom';
 import JSZip from 'jszip';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { parseMarkdown, serializeMarkdown, extractInternalLinks, extractHeadings, calculateStats } from './src/utils/markdownParser';
 
 // Set up JSDOM global browser environment
@@ -32,7 +33,40 @@ function assert(condition: boolean, testName: string, detail?: string) {
   }
 }
 
+let ownedServer: ChildProcess | null = null;
+
+async function pingServer(): Promise<boolean> {
+  try {
+    const response = await fetch('http://localhost:3000/api/health');
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Suite 1 needs the live API. Start the dev server ourselves when it is not running. */
+async function ensureServer(): Promise<void> {
+  if (await pingServer()) return;
+  ownedServer = spawn(process.execPath, ['--import', 'tsx', 'server.ts'], {
+    cwd: process.cwd(),
+    stdio: 'ignore',
+  });
+  for (let attempt = 0; attempt < 80; attempt++) {
+    if (await pingServer()) return;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  stopOwnedServer();
+  throw new Error('Dev server did not start on http://localhost:3000');
+}
+
+function stopOwnedServer(): void {
+  if (ownedServer && !ownedServer.killed) ownedServer.kill();
+  ownedServer = null;
+}
+
 async function runTestSuite() {
+  await ensureServer();
+
   console.log('\n============================================================');
   console.log('       MYTHOS WORKSPACE E2E AUTOMATED TEST SUITE');
   console.log('============================================================\n');
@@ -562,6 +596,7 @@ Template Builder: Allowed to create and structure reusable markdown templates.`;
   console.log(`E2E TEST SUMMARY: ${passedTests}/${totalTests} Passed (${failedTests} Failed)`);
   console.log('============================================================\n');
 
+  stopOwnedServer();
   if (failedTests > 0) {
     process.exit(1);
   }
@@ -569,5 +604,6 @@ Template Builder: Allowed to create and structure reusable markdown templates.`;
 
 runTestSuite().catch((err) => {
   console.error('Fatal test error:', err);
+  stopOwnedServer();
   process.exit(1);
 });
