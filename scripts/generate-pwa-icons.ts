@@ -82,38 +82,33 @@ const createSvg = (size: number, isMaskable: boolean = false) => {
 };
 
 async function generate() {
-  console.log('Generating PWA icons...');
+  console.log('Generating Mythos icons (5 files only)...');
 
-  // 1. Favicon SVG
-  const svg512 = createSvg(512, false);
-  fs.writeFileSync(path.join(publicDir, 'icon.svg'), svg512);
-  fs.writeFileSync(path.join(publicDir, 'favicon.svg'), svg512);
+  // Browser tab icon
+  await sharp(Buffer.from(createSvg(1254, false)))
+    .webp({ quality: 90 })
+    .toFile(path.join(publicDir, 'icon.webp'));
+  console.log('Generated icon.webp');
 
-  // 2. pwa-192x192.png
-  await sharp(Buffer.from(createSvg(192, false)))
+  // PWA / app icon
+  await sharp(Buffer.from(createSvg(1254, false)))
     .png()
-    .toFile(path.join(publicDir, 'pwa-192x192.png'));
-  console.log('Generated pwa-192x192.png');
+    .toFile(path.join(publicDir, 'pwa.png'));
+  console.log('Generated pwa.png');
 
-  // 3. pwa-512x512.png
-  await sharp(Buffer.from(createSvg(512, false)))
+  // PWA maskable icon (safe zone inside inner 72%)
+  await sharp(Buffer.from(createSvg(1254, true)))
     .png()
-    .toFile(path.join(publicDir, 'pwa-512x512.png'));
-  console.log('Generated pwa-512x512.png');
+    .toFile(path.join(publicDir, 'pwa-maskable.png'));
+  console.log('Generated pwa-maskable.png');
 
-  // 4. pwa-maskable-512x512.png
-  await sharp(Buffer.from(createSvg(512, true)))
-    .png()
-    .toFile(path.join(publicDir, 'pwa-maskable-512x512.png'));
-  console.log('Generated pwa-maskable-512x512.png');
-
-  // 5. apple-touch-icon.png (180x180)
+  // iOS home screen (180x180)
   await sharp(Buffer.from(createSvg(180, false)))
     .png()
     .toFile(path.join(publicDir, 'apple-touch-icon.png'));
   console.log('Generated apple-touch-icon.png');
 
-  // 6. favicon.ico (using 32x32 sharp png to favicon)
+  // Classic favicon (32x32)
   await sharp(Buffer.from(createSvg(64, false)))
     .resize(32, 32)
     .png()

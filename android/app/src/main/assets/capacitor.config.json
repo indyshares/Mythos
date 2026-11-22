@@ -2,7 +2,6 @@
 	"appId": "app.indyshares.mythos",
 	"appName": "Mythos",
 	"webDir": "dist",
-	"bundledWebRuntime": false,
 	"server": {
 		"androidScheme": "https",
 		"cleartext": true

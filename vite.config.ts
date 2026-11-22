@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png', 'icon.svg'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.webp', 'pwa.png', 'pwa-maskable.png'],
         manifest: {
           name: 'Mythos - Cloud Knowledge & Writing Workspace',
           short_name: 'Mythos',
@@ -24,20 +24,14 @@ export default defineConfig(() => {
           start_url: '/',
           icons: [
             {
-              src: '/pwa-192x192.png',
-              sizes: '192x192',
+              src: '/pwa.png',
+              sizes: 'any',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: '/pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/pwa-maskable-512x512.png',
-              sizes: '512x512',
+              src: '/pwa-maskable.png',
+              sizes: 'any',
               type: 'image/png',
               purpose: 'maskable'
             }

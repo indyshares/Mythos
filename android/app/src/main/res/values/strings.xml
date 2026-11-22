@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mythos</string>
+    <string name="title_activity_main">Mythos</string>
+    <string name="package_name">app.indyshares.mythos</string>
+    <string name="custom_url_scheme">app.indyshares.mythos</string>
+</resources>

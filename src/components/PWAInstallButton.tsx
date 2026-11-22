@@ -88,7 +88,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2.5">
-                <img src="/pwa-192x192.png" alt="Mythos" className="w-9 h-9 rounded-xl shadow" />
+                <img src="/pwa.png" alt="Mythos" className="w-9 h-9 rounded-xl shadow" />
                 <div>
                   <h3 className="text-sm font-semibold text-white">Install Mythos on iOS</h3>
                   <p className="text-xs text-neutral-400">Add to Home Screen for the full experience</p>

@@ -237,6 +237,56 @@ npm run build
 
 Because the test setup depends on live browser/server behavior and external providers, configure required services before running provider-specific tests.
 
+## Desktop (Tauri v2) and native permissions
+
+Mythos targets web, Android (Capacitor 8) and desktop (Tauri v2: Windows, macOS, Linux).
+
+Host prerequisites:
+
+- **Desktop**: Rust via [rustup](https://rustup.rs), plus platform toolchains — Windows: MSVC Build Tools + WebView2 Runtime; macOS: `xcode-select --install`; Linux (Ubuntu/Debian): `libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`.
+- **Android**: JDK 17 and Android SDK (`ANDROID_HOME`/`ANDROID_SDK_ROOT`), or Android Studio.
+
+Commands:
+
+```bash
+npm run tauri:dev        # desktop dev (loads http://localhost:3000 from `npm run dev`)
+npm run tauri:build      # desktop installers in src-tauri/target/release/bundle/
+npm run cap:sync         # copy dist/ + Capacitor plugins into the native projects
+npm run cap:android      # sync + open Android Studio
+```
+
+Permissions live in three places:
+
+- Desktop: `src-tauri/capabilities/default.json` (core/dialog/notification + scoped filesystem paths). Tauri does not prompt at runtime — capabilities are the grant.
+- Android: `android/app/src/main/AndroidManifest.xml` (storage/media + `POST_NOTIFICATIONS`).
+- Shared TypeScript API: `src/utils/permissions.ts`.
+
+```ts
+import { getPlatform, checkPermission, requestPermission, pickDirectory } from './utils/permissions';
+
+// getPlatform(): 'web' | 'capacitor' | 'tauri'
+if ((await checkPermission('files')) !== 'granted') {
+  await requestPermission('files'); // 'granted' | 'denied' | 'prompt' | 'unsupported'
+}
+const folder = await pickDirectory(); // null when cancelled/unsupported
+await requestPermission('notifications');
+```
+
+Build outputs (all relative to the repo root):
+
+| Platform | Output |
+|---|---|
+| Web | `dist/` |
+| Android APK (debug) | `android/app/build/outputs/apk/debug/app-debug.apk` |
+| Android AAB (release) | `android/app/build/outputs/bundle/release/app-release.aab` (signed when keystore env vars are set) |
+| Windows | `src-tauri/target/release/bundle/nsis/*.exe`, `.../msi/*.msi` |
+| macOS | `src-tauri/target/release/bundle/dmg/*.dmg`, `.../macos/*.app` |
+| Linux | `src-tauri/target/release/bundle/appimage/*.AppImage`, `.../deb/*.deb` |
+
+Android release signing reads `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` from environment variables (see `android/app/build.gradle`). In CI, also set the `ANDROID_KEYSTORE_BASE64` secret.
+
+CI builds all four targets via `.github/workflows/build-all.yml`; artifacts (APK/AAB, MSI/EXE, DMG, DEB/AppImage) are uploaded per job on push, release, or manual dispatch.
+
 ## Contributing
 
 1. Fork the repository.
