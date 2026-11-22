@@ -255,6 +255,86 @@ The GNU General Public License does not permit incorporating your program into p
 
 ========================================================================
 
+MYTHOS-SPECIFIC COPYRIGHT AND GPL APPLICATION NOTICE
+(This completed project notice applies to Mythos. The GNU GPL text above,
+including its general-purpose examples and instructions, is reproduced
+unchanged and remains the governing license text.)
+
+PROGRAM IDENTIFICATION
+
+Program name: Mythos
+Project owner and copyright holder: IndyShares
+Copyright: Copyright (C) 2026 IndyShares
+Program description: Mythos is a knowledge-management and creative-writing
+workspace for web browsers and Android devices.
+Project repository: https://github.com/indyshares/Mythos
+Project owner page: https://github.com/indyshares
+
+LICENSE
+
+The Mythos software code authored and maintained by IndyShares is licensed
+under the GNU General Public License, version 3, or (at your option) any
+later version.
+
+The complete license is the unmodified GNU GPL text included in this file.
+An online copy of the license is available at:
+https://www.gnu.org/licenses/gpl-3.0.html
+
+READY-TO-USE SOURCE-FILE COPYRIGHT NOTICE
+
+The following notice is the project-wide source-file notice for original
+Mythos source code authored and maintained by IndyShares. It contains no
+template fields that need to be filled in:
+
+    Mythos - knowledge-management and creative-writing workspace
+    Copyright (C) 2026 IndyShares
+
+    This file is part of Mythos.
+
+    Mythos is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Mythos is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Mythos. If not, see <https://www.gnu.org/licenses/>.
+
+READY-TO-USE INTERACTIVE APPLICATION NOTICE
+
+For an interactive Mythos interface that displays legal notices, use the
+following project-specific notice in its About, Legal, or equivalent area:
+
+    Mythos
+    Copyright (C) 2026 IndyShares
+
+    This software is licensed under the GNU General Public License,
+    version 3 or (at your option) any later version.
+
+    This software is provided WITHOUT ANY WARRANTY, to the extent
+    permitted by applicable law. You may redistribute and modify it
+    under the terms of the GNU GPL. View the complete license at:
+    https://github.com/indyshares/Mythos/blob/main/LICENSE.txt
+
+CONTACT AND PROJECT INFORMATION
+
+Public project and electronic contact entry point:
+https://github.com/indyshares/Mythos
+
+Project owner:
+https://github.com/indyshares
+
+No postal mailing address is published for this project. The public
+repository and owner page above are the designated public contact
+entry points; no email address or physical address is invented here.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+========================================================================
+
 MYTHOS PROJECT SCOPE NOTICE
 (This notice identifies the materials licensed by IndyShares. It does not
 modify or add restrictions to the GNU General Public License.)
