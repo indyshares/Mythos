@@ -1,6 +1,6 @@
 MYTHOS SOFTWARE LICENSE
 GNU GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007, or (at your option) any later version
+Version 3, 29 June 2007, or any later version
 
 Copyright (C) 2026 IndyShares
 
