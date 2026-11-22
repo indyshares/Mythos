@@ -33,7 +33,7 @@ export const MobileMoreSheet: React.FC<MobileMoreSheetProps> = ({
   isDarkMode,
   setIsDarkMode,
 }) => {
-  const { setActiveView, setIsQuickSwitcherOpen, exportWorkspaceAsJson } = useWorkspace();
+  const { setActiveView, setIsQuickSwitcherOpen, exportWorkspaceAsMarkdownZip } = useWorkspace();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   if (!isOpen) return null;
@@ -184,7 +184,7 @@ export const MobileMoreSheet: React.FC<MobileMoreSheetProps> = ({
             {/* Export */}
             <button
               onClick={() => {
-                exportWorkspaceAsJson();
+                exportWorkspaceAsMarkdownZip();
                 onClose();
               }}
               className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"

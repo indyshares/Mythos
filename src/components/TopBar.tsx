@@ -62,7 +62,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     saveState,
     undoLastOperation,
     canUndo,
-    exportWorkspaceAsJson,
+    exportWorkspaceAsMarkdownZip,
     language,
     setLanguage,
   } = useWorkspace();
@@ -379,9 +379,9 @@ export const TopBar: React.FC<TopBarProps> = ({
 
         {/* Export Workspace (Desktop) */}
         <button
-          onClick={exportWorkspaceAsJson}
+          onClick={exportWorkspaceAsMarkdownZip}
           className="hidden md:flex p-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
-          title="Export Workspace JSON"
+          title="Export Workspace (.md)"
         >
           <Download className="w-4 h-4" />
         </button>

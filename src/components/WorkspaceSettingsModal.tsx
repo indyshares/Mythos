@@ -57,7 +57,6 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
     dbConfig,
     updateDbConfig,
     syncToDatabase,
-    exportWorkspaceAsJson,
     exportWorkspaceAsMarkdownZip,
   } = useWorkspace();
 
@@ -984,20 +983,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                 <p className="text-xs text-neutral-500 leading-relaxed">ส่งออกข้อมูลเวิร์กสเปซของคุณในรูปแบบมาตรฐาน เพื่อความปลอดภัยและความสะดวกในการย้ายข้อมูล</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-8 bg-neutral-50 dark:bg-neutral-950 rounded-3xl border border-neutral-100 dark:border-neutral-800 flex flex-col justify-between group hover:border-sky-500/50 transition-all">
-                  <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-neutral-900 shadow-sm flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
-                       <FileCode className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h5 className="font-bold">JSON Bundle</h5>
-                      <p className="text-[10px] text-neutral-500 mt-1">Full database export including metadata, versions, and system instructions. Ideal for app recovery.</p>
-                    </div>
-                  </div>
-                  <button onClick={exportWorkspaceAsJson} className="mt-8 h-12 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 font-bold rounded-xl text-xs hover:bg-sky-500 hover:text-white transition-all">Download JSON</button>
-                </div>
-
+              <div className="grid grid-cols-1 gap-4">
                 <div className="p-8 bg-neutral-50 dark:bg-neutral-950 rounded-3xl border border-neutral-100 dark:border-neutral-800 flex flex-col justify-between group hover:border-sky-500/50 transition-all">
                   <div className="space-y-4">
                     <div className="w-12 h-12 rounded-2xl bg-white dark:bg-neutral-900 shadow-sm flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">

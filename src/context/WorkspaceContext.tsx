@@ -22,6 +22,11 @@ import {
 } from '../utils/initialData';
 import { parseMarkdown, serializeMarkdown, extractInternalLinks } from '../utils/markdownParser';
 import { safeFetchJson } from '../utils/apiHelper';
+import {
+  nativeStorageEnabled,
+  readNativeTree,
+  writeNativeTree,
+} from '../utils/storage/nativeStore';
 
 
 interface WorkspaceContextType {
@@ -143,8 +148,7 @@ interface WorkspaceContextType {
   getBacklinks: (fileId: string) => { file: FileItem; snippet: string }[];
   getOutgoingLinks: (fileId: string) => { targetName: string; resolvedFile: FileItem | null }[];
 
-  // Export
-  exportWorkspaceAsJson: () => void;
+  // Export (Markdown only)
   exportWorkspaceAsMarkdownZip: () => void;
   navigateInternalLink: (linkTarget: string) => void;
 
@@ -361,6 +365,49 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     loadSecureData();
   }, []);
 
+  // Native apps use real folders/.md files; hydrate from disk before persisting.
+  const [nativeHydrated, setNativeHydrated] = useState(!nativeStorageEnabled());
+  const [nativeWriteEnabled, setNativeWriteEnabled] = useState(false);
+
+  useEffect(() => {
+    if (!nativeStorageEnabled()) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const tree = await readNativeTree(workspaces);
+        if (cancelled) return;
+        if (tree.workspaces.length) {
+          setWorkspaces(tree.workspaces);
+          setFolders(tree.folders);
+          setFiles(tree.files);
+        }
+        setNativeWriteEnabled(true);
+      } catch (err) {
+        console.error('Failed to load native workspace tree:', err);
+        // Never write/clean disk when hydration failed — that could delete real files.
+        setNativeWriteEnabled(false);
+      } finally {
+        if (!cancelled) setNativeHydrated(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Run once on mount; workspaces is intentionally read from initial state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Native: reconcile disk with in-memory state (debounced).
+  useEffect(() => {
+    if (!nativeStorageEnabled() || !nativeHydrated || !nativeWriteEnabled) return;
+    const timer = setTimeout(() => {
+      writeNativeTree({ workspaces, folders, files }).catch((err) =>
+        console.error('Failed to persist native workspace tree:', err)
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [workspaces, folders, files, nativeHydrated, nativeWriteEnabled]);
+
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(aiProviders.map(({customApiKey, ...rest}) => rest)));
@@ -378,7 +425,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.WORKSPACES, JSON.stringify(workspaces));
+    if (!nativeStorageEnabled()) {
+      localStorage.setItem(STORAGE_KEYS.WORKSPACES, JSON.stringify(workspaces));
+    }
   }, [workspaces]);
 
   useEffect(() => {
@@ -386,11 +435,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [activeWorkspaceId]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+    if (!nativeStorageEnabled()) {
+      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+    }
   }, [folders]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(files));
+    if (!nativeStorageEnabled()) {
+      localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(files));
+    }
   }, [files]);
 
   useEffect(() => {
@@ -1408,29 +1461,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [files, activeWorkspaceId, openFileInTab, createFile]
   );
 
-  // Export Workspace as JSON
-  const exportWorkspaceAsJson = useCallback(() => {
-    const wsFiles = files.filter((f) => f.workspaceId === activeWorkspaceId && !f.deletedAt);
-    const wsFolders = folders.filter((f) => f.workspaceId === activeWorkspaceId && !f.deletedAt);
-    const exportData = {
-      workspace: activeWorkspace,
-      instructions: workspaceInstructions,
-      folders: wsFolders,
-      files: wsFiles,
-      exportedAt: new Date().toISOString(),
-      version: '1.0',
-    };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${activeWorkspace.name.replace(/\s+/g, '_')}_workspace_export.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [files, folders, activeWorkspace, workspaceInstructions, activeWorkspaceId]);
-
-  // Export Workspace as a real ZIP archive with folder hierarchy
+  // Export Workspace as a real ZIP archive containing only .md files, keeping folder hierarchy
   const exportWorkspaceAsMarkdownZip = useCallback(async () => {
     try {
       const zip = new JSZip();
@@ -1562,7 +1593,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     lastSavedAt,
     getBacklinks,
     getOutgoingLinks,
-    exportWorkspaceAsJson,
     exportWorkspaceAsMarkdownZip,
     navigateInternalLink,
     language,

@@ -272,6 +272,8 @@ const folder = await pickDirectory(); // null when cancelled/unsupported
 await requestPermission('notifications');
 ```
 
+Native storage (Tauri desktop / Capacitor Android): workspaces, folders and notes are kept as real directories and real `.md` files under `Documents/Mythos`. The web app keeps the existing localStorage JSON format. Non-document state (workspace icon/description, AI sessions, templates, versions, provider keys) stays in localStorage/IndexedDB. Export produces a ZIP containing only `.md` files with folder structure preserved; JSON export was removed.
+
 Clearing app data:
 
 ```ts
