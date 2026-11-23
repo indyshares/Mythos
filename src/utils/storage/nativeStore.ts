@@ -442,19 +442,15 @@ export async function writeNativeTree(tree: NativeTree): Promise<void> {
 
   for (const dir of desiredDirs) await mkdirRel(dir);
 
-  // Remove .md files that no longer exist in state.
-  let roots: Entry[] = [];
-  try {
-    roots = await readDirRel('');
-  } catch {
-    return;
-  }
-  for (const rootEntry of roots) {
-    if (!rootEntry.isDirectory) continue;
+  // Remove stale .md files ONLY inside workspaces owned by this app.
+  // Never scan the whole storage root — it may be the user's Documents folder.
+  for (const ws of tree.workspaces) {
+    const wsRel = workspaceNames.get(ws.id);
+    if (!wsRel) continue;
     const found: string[] = [];
-    await walk(`${rootEntry.name}`, found);
+    await walk(wsRel, found);
     const trashed: string[] = [];
-    await walk(`${rootEntry.name}/${TRASH}`, trashed);
+    await walk(`${wsRel}/${TRASH}`, trashed);
     trashed.forEach((rel) => found.push(`${TRASH}/${rel}`));
     for (const rel of found) {
       if (!rel.toLowerCase().endsWith('.md')) continue;
