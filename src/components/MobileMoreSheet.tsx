@@ -240,7 +240,7 @@ export const MobileMoreSheet: React.FC<MobileMoreSheetProps> = ({
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-sky-500/30 border border-sky-500/30 shrink-0">
                   <img
-                    src="/src/assets/images/mythos_logo_1793463782853.jpg"
+                    src="/icon.webp"
                     alt="Mythos Logo"
                     className="w-full h-full object-cover"
                   />
