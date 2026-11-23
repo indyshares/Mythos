@@ -52,9 +52,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
   } = useWorkspace();
   const { activeAccentHex } = useTheme();
 
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
-    new Set(['f-chars', 'f-world', 'f-planning', 'f-notes'])
-  );
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(new Set());
   const [filterQuery, setFilterQuery] = useState('');
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());

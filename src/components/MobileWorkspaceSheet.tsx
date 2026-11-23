@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, FolderKanban, Plus, Check, Trash2, ArrowRight } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { StorageLocationPicker } from './StorageLocationPicker';
 
 interface MobileWorkspaceSheetProps {
   isOpen: boolean;
@@ -8,7 +9,7 @@ interface MobileWorkspaceSheetProps {
 }
 
 export const MobileWorkspaceSheet: React.FC<MobileWorkspaceSheetProps> = ({ isOpen, onClose }) => {
-  const { workspaces, activeWorkspace, setActiveWorkspaceId, createWorkspace, updateWorkspace } = useWorkspace();
+  const { workspaces, activeWorkspace, setActiveWorkspaceId, createWorkspace, updateWorkspace, refreshStorageRoot } = useWorkspace();
   const [isCreating, setIsCreating] = useState(false);
   const [editingWsId, setEditingWsId] = useState<string | null>(null);
   const [editingWsName, setEditingWsName] = useState('');
@@ -148,6 +149,7 @@ export const MobileWorkspaceSheet: React.FC<MobileWorkspaceSheetProps> = ({ isOp
             </button>
           ) : (
             <form onSubmit={handleCreate} className="space-y-2">
+              <StorageLocationPicker onChanged={refreshStorageRoot} />
               <input
                 type="text"
                 autoFocus

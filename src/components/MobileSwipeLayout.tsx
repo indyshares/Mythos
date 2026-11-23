@@ -25,11 +25,8 @@ export const MobileSwipeLayout = forwardRef<MobileSwipeLayoutHandle, MobileSwipe
     }));
 
     useEffect(() => {
-      // Scroll to the middle panel (Editor) on mount
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth;
-        containerRef.current.scrollLeft = width;
-      }
+      // Mobile opens on the leftmost (files) panel.
+      if (containerRef.current) containerRef.current.scrollLeft = 0;
     }, []);
 
     return (
@@ -39,7 +36,7 @@ export const MobileSwipeLayout = forwardRef<MobileSwipeLayoutHandle, MobileSwipe
         style={{ scrollBehavior: 'smooth' }}
       >
         {children.map((child, index) => (
-          <div key={index} className="w-screen h-full flex-shrink-0 snap-center">
+          <div key={index} className="w-screen h-full flex-shrink-0 snap-start">
             {child}
           </div>
         ))}

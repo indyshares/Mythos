@@ -87,7 +87,11 @@ For the web version, or to run from source: `npm run dev` → http://localhost:3
 CI build artifacts for every push are also available under the repository
 [Actions runs](https://github.com/indyshares/Mythos/actions/workflows/build-all.yml); download them with
 `gh run download <run-id> -D installers`. Desktop and Android builds store workspace content as real
-folders and `.md` files under `Documents/Mythos`.
+folders and `.md` files under `Documents/Mythos`. When creating a workspace on a native app,
+use **Storage location** in the create form: desktop opens a system folder picker (access is
+persisted), Android lets you choose Documents, external storage or private app storage plus a
+folder name. Both mobile and desktop show a short starting screen on launch; mobile opens on the
+leftmost (files) page.
 
 ## Environment Variables
 

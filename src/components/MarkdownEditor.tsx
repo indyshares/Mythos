@@ -370,6 +370,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [inlineTitle, setInlineTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const lastActiveBlockRef = useRef<HTMLElement | null>(null);
 
   const displayTitle = (parsed.frontmatter.title as string) || (activeFile ? activeFile.name.replace(/\.md$/, '') : '');
 
@@ -523,8 +524,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
       console.error('Markdown auto-format error:', err);
     }
   };
-
-  const lastActiveBlockRef = useRef<HTMLElement | null>(null);
 
   // Format inline markdown in a block element (*italic*, **bold**, ***bold italic***, ~~del~~, `code`, ==highlight==, [[Link]], [link](url))
   const formatInlineMarkdownInBlock = (block: HTMLElement): boolean => {
@@ -2494,7 +2493,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
           <div className="p-3 sm:p-4 flex items-center justify-between gap-2 border-b border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-950/50">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold text-xs shrink-0 uppercase">
-                {parsed.frontmatter.type ? parsed.frontmatter.type.slice(0, 2) : 'MD'}
+                {typeof parsed.frontmatter.type === 'string' && parsed.frontmatter.type
+                  ? parsed.frontmatter.type.slice(0, 2)
+                  : 'MD'}
               </div>
 
               <div className="min-w-0 flex-1">

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import JSZip from 'jszip';
 import {
   Workspace,
@@ -23,6 +23,7 @@ import {
 import { parseMarkdown, serializeMarkdown, extractInternalLinks } from '../utils/markdownParser';
 import { safeFetchJson } from '../utils/apiHelper';
 import {
+  getStorageRoot,
   nativeStorageEnabled,
   readNativeTree,
   writeNativeTree,
@@ -151,6 +152,10 @@ interface WorkspaceContextType {
   // Export (Markdown only)
   exportWorkspaceAsMarkdownZip: () => void;
   navigateInternalLink: (linkTarget: string) => void;
+
+  // Native storage location
+  storageRootLabel: string;
+  refreshStorageRoot: () => void;
 
   // Language
   language: 'th' | 'en';
@@ -368,6 +373,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Native apps use real folders/.md files; hydrate from disk before persisting.
   const [nativeHydrated, setNativeHydrated] = useState(!nativeStorageEnabled());
   const [nativeWriteEnabled, setNativeWriteEnabled] = useState(false);
+  const [storageRootVersion, setStorageRootVersion] = useState(0);
+  const userEditedRef = useRef(false);
+
+  const refreshStorageRoot = useCallback(() => {
+    setNativeWriteEnabled(false);
+    setNativeHydrated(false);
+    userEditedRef.current = false;
+    setStorageRootVersion((v) => v + 1);
+  }, []);
 
   useEffect(() => {
     if (!nativeStorageEnabled()) return;
@@ -376,10 +390,16 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         const tree = await readNativeTree(workspaces);
         if (cancelled) return;
-        if (tree.workspaces.length) {
-          setWorkspaces(tree.workspaces);
-          setFolders(tree.folders);
-          setFiles(tree.files);
+        if (!userEditedRef.current) {
+          if (tree.workspaces.length) {
+            setWorkspaces(tree.workspaces);
+            setFolders(tree.folders);
+            setFiles(tree.files);
+            // Keep the active workspace in sync with what was actually loaded.
+            if (!tree.workspaces.some((w) => w.id === activeWorkspaceId)) {
+              setActiveWorkspaceId(tree.workspaces[0].id);
+            }
+          }
         }
         setNativeWriteEnabled(true);
       } catch (err) {
@@ -393,9 +413,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return () => {
       cancelled = true;
     };
-    // Run once on mount; workspaces is intentionally read from initial state.
+    // Re-run when the chosen native storage root changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageRootVersion]);
 
   // Native: reconcile disk with in-memory state (debounced).
   useEffect(() => {
@@ -503,6 +523,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Create Workspace
   const createWorkspace = useCallback((name: string, description = '') => {
+    userEditedRef.current = true;
     const id = `ws-${Date.now()}`;
     const newWs: Workspace = {
       id,
@@ -649,6 +670,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // File Operations
   const createFile = useCallback(
     (name: string, parentId: string | null = null, initialContent = ''): FileItem => {
+      userEditedRef.current = true;
       const cleanName = name.endsWith('.md') ? name : `${name}.md`;
       const id = `file-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const newFile: FileItem = {
@@ -797,6 +819,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Folder Operations
   const createFolder = useCallback(
     (name: string, parentId: string | null = null): Folder => {
+      userEditedRef.current = true;
       const cleanName = name.trim();
       const id = `f-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const newFolder: Folder = {
@@ -1595,6 +1618,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     getOutgoingLinks,
     exportWorkspaceAsMarkdownZip,
     navigateInternalLink,
+    storageRootLabel: getStorageRoot().label,
+    refreshStorageRoot,
     language,
     setLanguage,
     t,

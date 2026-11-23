@@ -40,11 +40,17 @@ function WorkspaceApp() {
   const { isDarkMode, setIsDarkMode } = useTheme();
   
   const swipeRef = React.useRef<MobileSwipeLayoutHandle>(null);
+  const skipInitialNavRef = React.useRef(true);
   const handleNavigate = (index: number) => {
     swipeRef.current?.scrollToIndex(index);
   };
 
   useEffect(() => {
+    // On mount mobile stays on the leftmost panel; only react to later view changes.
+    if (skipInitialNavRef.current) {
+      skipInitialNavRef.current = false;
+      return;
+    }
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       if (activeView === 'ai') {
         handleNavigate(2);

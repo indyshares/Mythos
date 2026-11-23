@@ -23,6 +23,7 @@ import {
   History,
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { StorageLocationPicker } from './StorageLocationPicker';
 import { useTheme } from '../context/ThemeContext';
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -63,6 +64,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     undoLastOperation,
     canUndo,
     exportWorkspaceAsMarkdownZip,
+    refreshStorageRoot,
     language,
     setLanguage,
   } = useWorkspace();
@@ -240,6 +242,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                   </button>
                 ) : (
                   <form onSubmit={handleCreateWorkspace} className="p-2 space-y-2">
+                    <StorageLocationPicker onChanged={refreshStorageRoot} />
                     <input
                       type="text"
                       autoFocus

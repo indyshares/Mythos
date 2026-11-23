@@ -14,6 +14,15 @@ import { parseMarkdown } from '../markdownParser';
 
 const ROOT_NAME = 'Mythos';
 const TRASH = '.trash';
+const ROOT_STORAGE_KEY = 'mythos_native_root';
+
+export type StorageRoot = {
+  /** Android base directory; ignored on desktop. */
+  directory: 'documents' | 'externalstorage' | 'data';
+  /** Absolute path on desktop, relative path under the base directory on Android. */
+  path: string;
+  label: string;
+};
 
 export type NativeTree = {
   workspaces: Workspace[];
@@ -23,7 +32,48 @@ export type NativeTree = {
 
 type Entry = { name: string; isDirectory: boolean; isFile: boolean };
 
+const DEFAULT_ROOT: StorageRoot = {
+  directory: 'documents',
+  path: ROOT_NAME,
+  label: `Documents/${ROOT_NAME}`,
+};
+
 let cachedBase: string | null = null;
+let rootOverride: StorageRoot | null = null;
+
+export function getStorageRoot(): StorageRoot {
+  if (rootOverride) return rootOverride;
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(ROOT_STORAGE_KEY);
+      if (saved) return JSON.parse(saved) as StorageRoot;
+    } catch {
+      // ignore malformed setting
+    }
+  }
+  return DEFAULT_ROOT;
+}
+
+/** Persist a chosen storage root and clear cached paths. */
+export function setStorageRoot(root: StorageRoot | null): void {
+  rootOverride = root;
+  cachedBase = null;
+  if (typeof localStorage === 'undefined') return;
+  if (root) localStorage.setItem(ROOT_STORAGE_KEY, JSON.stringify(root));
+  else localStorage.removeItem(ROOT_STORAGE_KEY);
+}
+
+/** Desktop: ask the user for a folder. Android uses the in-app location picker. */
+export async function chooseDesktopRoot(): Promise<StorageRoot | null> {
+  const { open } = await import('@tauri-apps/plugin-dialog');
+  const selected = await open({
+    directory: true,
+    multiple: false,
+    title: 'Choose Mythos storage folder',
+  });
+  if (typeof selected !== 'string') return null;
+  return { directory: 'documents', path: selected, label: selected };
+}
 
 function isTauri(): boolean {
   return getPlatform() === 'tauri';
@@ -31,11 +81,16 @@ function isTauri(): boolean {
 
 async function baseDir(): Promise<string> {
   if (cachedBase) return cachedBase;
+  const root = getStorageRoot();
   if (isTauri()) {
-    const { documentDir, join } = await import('@tauri-apps/api/path');
-    cachedBase = await join(await documentDir(), ROOT_NAME);
+    if (root.path && root.path !== ROOT_NAME) {
+      cachedBase = root.path; // user-chosen absolute folder
+    } else {
+      const { documentDir, join } = await import('@tauri-apps/api/path');
+      cachedBase = await join(await documentDir(), ROOT_NAME);
+    }
   } else {
-    cachedBase = ROOT_NAME; // relative to Directory.Documents
+    cachedBase = root.path || ROOT_NAME;
   }
   return cachedBase;
 }
@@ -45,12 +100,25 @@ async function fullPath(rel: string): Promise<string> {
     const { join } = await import('@tauri-apps/api/path');
     return join(await baseDir(), rel);
   }
-  return rel ? `${ROOT_NAME}/${rel}` : ROOT_NAME;
+  const root = getStorageRoot().path || ROOT_NAME;
+  return rel ? `${root}/${rel}` : root;
 }
 
 function capacitorDir() {
   // Dynamic import avoids loading the native plugins in the web bundle.
   return import('@capacitor/filesystem');
+}
+
+async function capacitorFs() {
+  const mod = await capacitorDir();
+  const root = getStorageRoot();
+  const Directory =
+    root.directory === 'externalstorage'
+      ? mod.Directory.ExternalStorage
+      : root.directory === 'data'
+        ? mod.Directory.Data
+        : mod.Directory.Documents;
+  return { ...mod, Directory };
 }
 
 export function sanitizeName(name: string): string {
@@ -67,8 +135,8 @@ async function mkdirRel(rel: string): Promise<void> {
     const { mkdir } = await import('@tauri-apps/plugin-fs');
     await mkdir(await fullPath(rel), { recursive: true });
   } else {
-    const { Filesystem, Directory } = await capacitorDir();
-    await Filesystem.mkdir({ path: await fullPath(rel), directory: Directory.Documents, recursive: true });
+    const { Filesystem, Directory } = await capacitorFs();
+    await Filesystem.mkdir({ path: await fullPath(rel), directory: Directory, recursive: true });
   }
 }
 
@@ -82,8 +150,8 @@ async function readDirRel(rel: string): Promise<Entry[]> {
       isFile: e.isFile,
     }));
   }
-  const { Filesystem, Directory } = await capacitorDir();
-  const result = await Filesystem.readdir({ path: await fullPath(rel), directory: Directory.Documents });
+  const { Filesystem, Directory } = await capacitorFs();
+  const result = await Filesystem.readdir({ path: await fullPath(rel), directory: Directory });
   return result.files.map((f) => ({
     name: f.name,
     isDirectory: f.type === 'directory',
@@ -96,10 +164,10 @@ async function readTextRel(rel: string): Promise<string> {
     const { readTextFile } = await import('@tauri-apps/plugin-fs');
     return readTextFile(await fullPath(rel));
   }
-  const { Filesystem, Directory, Encoding } = await capacitorDir();
+  const { Filesystem, Directory, Encoding } = await capacitorFs();
   const result = await Filesystem.readFile({
     path: await fullPath(rel),
-    directory: Directory.Documents,
+    directory: Directory,
     encoding: Encoding.UTF8,
   });
   return String(result.data);
@@ -112,10 +180,10 @@ async function writeTextRel(rel: string, content: string): Promise<void> {
     const { writeTextFile } = await import('@tauri-apps/plugin-fs');
     await writeTextFile(await fullPath(rel), content);
   } else {
-    const { Filesystem, Directory, Encoding } = await capacitorDir();
+    const { Filesystem, Directory, Encoding } = await capacitorFs();
     await Filesystem.writeFile({
       path: await fullPath(rel),
-      directory: Directory.Documents,
+      directory: Directory,
       data: content,
       encoding: Encoding.UTF8,
     });
@@ -127,8 +195,8 @@ async function removeRel(rel: string): Promise<void> {
     const { remove } = await import('@tauri-apps/plugin-fs');
     await remove(await fullPath(rel), { recursive: true });
   } else {
-    const { Filesystem, Directory } = await capacitorDir();
-    await Filesystem.deleteFile({ path: await fullPath(rel), directory: Directory.Documents });
+    const { Filesystem, Directory } = await capacitorFs();
+    await Filesystem.deleteFile({ path: await fullPath(rel), directory: Directory });
   }
 }
 
@@ -248,9 +316,11 @@ export async function readNativeTree(existingWorkspaces: Workspace[] = []): Prom
     // Soft-deleted items live under .trash/<original path> and come back with deletedAt.
     const trashedPaths: string[] = [];
     await walk(`${wsRel}/${TRASH}`, trashedPaths);
+    const trashPrefix = `${wsRel}/${TRASH}/`;
     const trashedDirs = new Set<string>();
     for (const p of trashedPaths) {
-      const parts = p.split('/');
+      const originalRel = p.startsWith(trashPrefix) ? p.slice(trashPrefix.length) : p;
+      const parts = originalRel.split('/');
       for (let i = 1; i < parts.length; i++) trashedDirs.add(parts.slice(0, i).join('/'));
     }
     for (const dirRel of trashedDirs) {
@@ -265,20 +335,21 @@ export async function readNativeTree(existingWorkspaces: Workspace[] = []): Prom
         deletedAt: now,
       });
     }
-    for (const fileRel of trashedPaths) {
-      if (trashedDirs.has(fileRel)) continue;
-      const parentRel = fileRel.includes('/') ? fileRel.slice(0, fileRel.lastIndexOf('/')) : '';
-      const name = fileRel.split('/').pop() || fileRel;
+    for (const p of trashedPaths) {
+      const originalRel = p.startsWith(trashPrefix) ? p.slice(trashPrefix.length) : p;
+      if (trashedDirs.has(originalRel)) continue;
+      const parentRel = originalRel.includes('/') ? originalRel.slice(0, originalRel.lastIndexOf('/')) : '';
+      const name = originalRel.split('/').pop() || originalRel;
       let content = '';
       try {
-        content = await readTextRel(`${wsRel}/${TRASH}/${fileRel}`);
+        content = await readTextRel(p);
       } catch {
         continue;
       }
       const parsed = parseMarkdown(content);
       const frontmatter = parsed.frontmatter as FrontmatterProperties;
       files.push({
-        id: `file:${wsId}:.trash/${fileRel}`,
+        id: `file:${wsId}:.trash/${originalRel}`,
         workspaceId: wsId,
         parentId: parentRel ? `f:${wsId}:.trash/${parentRel}` : null,
         name,
