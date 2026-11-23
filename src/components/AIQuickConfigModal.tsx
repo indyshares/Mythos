@@ -34,9 +34,7 @@ export const AIQuickConfigModal: React.FC<AIQuickConfigModalProps> = ({
 
   // Sync draft instructions when modal opens or workspaceInstructions changes
   useEffect(() => {
-    if (workspaceInstructions?.content) {
-      setDraftInstructions(workspaceInstructions.content);
-    }
+    setDraftInstructions(workspaceInstructions?.content || '');
   }, [workspaceInstructions?.content, isOpen]);
 
   if (!isOpen) return null;
@@ -177,8 +175,7 @@ export const AIQuickConfigModal: React.FC<AIQuickConfigModalProps> = ({
                     ? provider.availableModels
                     : isNative
                     ? [
-                        'gemini-3.8-flash',
-                        'gemini-3.8-pro',
+                        'gemini-3.5-flash',
                         'gemini-2.5-flash',
                         'gemini-2.5-pro',
                         'gemini-2.5-flash-lite',
@@ -233,7 +230,7 @@ export const AIQuickConfigModal: React.FC<AIQuickConfigModalProps> = ({
                               <div className="flex items-center gap-2 min-w-0 pr-2">
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-sky-500' : 'bg-neutral-300 dark:bg-neutral-700'}`} />
                                 <span className="font-mono text-xs truncate">{m}</span>
-                                {m === 'gemini-3.8-flash' && (
+                                {m === 'gemini-3.5-flash' && (
                                   <span className="ml-1 shrink-0 text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded font-bold flex items-center gap-0.5">
                                     <Zap className="w-2.5 h-2.5 fill-current" /> Fast
                                   </span>

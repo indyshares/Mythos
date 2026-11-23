@@ -27,7 +27,9 @@ import {
   resetStorageRoot,
   nativeStorageEnabled,
   readNativeTree,
+  readWorkspaceInstructions,
   writeNativeTree,
+  writeWorkspaceInstructions,
 } from '../utils/storage/nativeStore';
 
 
@@ -304,19 +306,17 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         id: 'gemini-native',
         name: 'Google Gemini (Native)',
         protocol: 'gemini',
-        defaultModel: 'gemini-3.8-flash',
+        defaultModel: '',
         isDefault: true,
-        availableModels: [
-          'gemini-3.8-flash',
-          'gemini-3.8-pro',
-          'gemini-2.5-flash',
-          'gemini-2.5-pro',
-          'gemini-2.5-flash-lite',
-          'gemini-1.5-flash',
-          'gemini-1.5-pro',
-          'gemini-flash-latest',
-          'gemini-pro-latest',
-        ],
+        availableModels: [],
+      },
+      {
+        id: 'openrouter-native',
+        name: 'OpenRouter (Native)',
+        protocol: 'openai',
+        baseUrl: 'https://openrouter.ai/api/v1',
+        defaultModel: '',
+        availableModels: [],
       },
     ];
   });
@@ -402,6 +402,21 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (!tree.workspaces.some((w) => w.id === activeWorkspaceId)) {
               setActiveWorkspaceId(tree.workspaces[0].id);
             }
+          }
+          // System prompt instructions live in <workspace>/Configures/AGENTS.md.
+          const diskInstructions: Record<string, WorkspaceInstructions> = {};
+          for (const ws of tree.workspaces) {
+            const content = await readWorkspaceInstructions(ws.name);
+            if (content !== null) {
+              diskInstructions[ws.id] = {
+                workspaceId: ws.id,
+                content,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+          }
+          if (Object.keys(diskInstructions).length) {
+            setInstructionsMap((prev) => ({ ...prev, ...diskInstructions }));
           }
         }
         setNativeWriteEnabled(true);
@@ -1064,7 +1079,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return (
       instructionsMap[activeWorkspaceId] || {
         workspaceId: activeWorkspaceId,
-        content: `# Workspace Instructions\n\nBe precise, adhere strictly to existing lore, and cite all source notes.`,
+        content: '',
         updatedAt: new Date().toISOString(),
       }
     );
@@ -1080,8 +1095,16 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           updatedAt: new Date().toISOString(),
         },
       }));
+      if (nativeStorageEnabled()) {
+        const name = workspaces.find((w) => w.id === activeWorkspaceId)?.name;
+        if (name) {
+          void writeWorkspaceInstructions(name, content).catch((err) =>
+            console.error('Failed to write AGENTS.md:', err)
+          );
+        }
+      }
     },
-    [activeWorkspaceId]
+    [activeWorkspaceId, workspaces]
   );
 
   // AI Sessions & Draft Lifecycle
@@ -1400,7 +1423,12 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          provider: provider.protocol,
+          provider:
+            provider.id === 'gemini-native'
+              ? 'gemini'
+              : provider.id === 'openrouter-native'
+                ? 'openrouter'
+                : provider.protocol,
           baseUrl: provider.baseUrl,
           customApiKey: provider.customApiKey,
           model: provider.defaultModel,
@@ -1409,9 +1437,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
 
       if (data.success) {
-        updateAIProvider(id, { 
-          isConnected: true, 
-          availableModels: data.models || provider.availableModels 
+        const models = data.models?.length ? data.models : provider.availableModels || [];
+        updateAIProvider(id, {
+          isConnected: true,
+          availableModels: models,
+          defaultModel: provider.defaultModel || models[0] || '',
         });
       }
 
@@ -1420,6 +1450,27 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return { success: false, message: err.message || 'Connection failed' };
     }
   }, [aiProviders, updateAIProvider]);
+
+  // Automatically load model lists once per provider (no manual model id entry).
+  const autoLoadedProvidersRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const provider of aiProviders) {
+      if (autoLoadedProvidersRef.current.has(provider.id)) continue;
+      if (provider.availableModels?.length) {
+        autoLoadedProvidersRef.current.add(provider.id);
+        continue;
+      }
+      if (
+        provider.isConnected ||
+        provider.customApiKey ||
+        provider.id === 'gemini-native' ||
+        provider.id === 'openrouter-native'
+      ) {
+        autoLoadedProvidersRef.current.add(provider.id);
+        void testAIConnection(provider.id);
+      }
+    }
+  }, [aiProviders, testAIConnection]);
 
   const toggleManualContextId = useCallback((fileId: string) => {
     setManualContextIds((prev) =>

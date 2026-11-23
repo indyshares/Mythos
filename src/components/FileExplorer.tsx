@@ -20,6 +20,7 @@ import {
   PanelLeftClose,
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { isTauri } from '../utils/permissions';
 import { useTheme } from '../context/ThemeContext';
 import { Folder, FileItem } from '../types';
 
@@ -249,6 +250,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                 style={{ paddingLeft: `${depth * 12 + 8}px` }}
                 onClick={() => toggleFolder(folder.id)}
                 onContextMenu={(e) => {
+                  if (!isTauri()) return; // mobile has no right-click
                   e.preventDefault();
                   setContextMenu({
                     x: e.clientX,
@@ -384,6 +386,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                 onOpenFile?.();
               }}
               onContextMenu={(e) => {
+                if (!isTauri()) return;
                 e.preventDefault();
                 setContextMenu({
                   x: e.clientX,

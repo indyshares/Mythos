@@ -73,6 +73,10 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
   // AI Instructions state
   const [instructionsText, setInstructionsText] = useState(workspaceInstructions.content);
 
+  useEffect(() => {
+    setInstructionsText(workspaceInstructions.content || '');
+  }, [workspaceInstructions.content]);
+
   // Database state
   const [dbType, setDbType] = useState<DatabaseType>(dbConfig.type);
   const [dbForm, setDbForm] = useState(dbConfig);
@@ -165,6 +169,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
         setReplacingGeminiKey(false);
         setGeminiKeyInput('');
       } else {
+        updateAIProvider('gemini-native', { isConnected: false });
         setGeminiStatusFeedback({ success: false, message: res.message || 'การเชื่อมต่อล้มเหลว กรุณาตรวจสอบ API Key' });
       }
     } catch (err: any) {
@@ -200,6 +205,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
         setCustomKeyInput('');
         setProviderTestResults(prev => ({ ...prev, [providerId]: { success: true, message: 'อัปเดตและเชื่อมต่อ API Key สำเร็จ!' } }));
       } else {
+        updateAIProvider(providerId, { isConnected: false });
         setProviderTestResults(prev => ({ ...prev, [providerId]: { success: false, message: res.message } }));
       }
     } catch (err: any) {
@@ -587,7 +593,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                           </div>
                           <div>
                             <h5 className="font-bold text-sm">Google AI API</h5>
-                            <p className="text-[11px] text-neutral-400 font-mono">gemini-3.8-flash / gemini-2.0-flash-exp</p>
+                            <p className="text-[11px] text-neutral-400 font-mono">gemini-3.5-flash / gemini-2.0-flash-exp</p>
                           </div>
                         </div>
 
@@ -650,7 +656,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                               <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Select Active Model</label>
                               <div className="relative">
                                 <select 
-                                  value={native?.defaultModel || 'gemini-3.8-flash'}
+                                  value={native?.defaultModel || 'gemini-3.5-flash'}
                                   onChange={(e) => updateAIProvider('gemini-native', { defaultModel: e.target.value })}
                                   className="w-full h-12 px-4 bg-neutral-900 border border-neutral-800 rounded-2xl text-xs outline-none focus:border-sky-500 transition-all font-mono appearance-none"
                                 >
@@ -658,8 +664,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                                     native?.availableModels && native.availableModels.length > 0
                                       ? native.availableModels
                                       : [
-                                          'gemini-3.8-flash',
-                                          'gemini-3.8-pro',
+                                          'gemini-3.5-flash',
                                           'gemini-2.5-flash',
                                           'gemini-2.5-pro',
                                           'gemini-2.5-flash-lite',

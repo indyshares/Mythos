@@ -1812,6 +1812,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     if (isTauri()) {
       e.preventDefault();
       e.stopPropagation();
+      saveCurrentSelection();
       setToolMenu({ x: e.clientX, y: e.clientY });
     }
   };
@@ -1820,7 +1821,70 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     if (!isTauri()) return;
     e.preventDefault();
     e.stopPropagation();
+    saveCurrentSelection();
     setToolMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  const clipboardWrite = async (text: string) => {
+    if (isTauri()) {
+      const { writeText } = await import('@tauri-apps/plugin-clipboard-manager');
+      await writeText(text);
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+  };
+
+  const clipboardRead = async (): Promise<string> => {
+    if (isTauri()) {
+      const { readText } = await import('@tauri-apps/plugin-clipboard-manager');
+      return readText();
+    }
+    return navigator.clipboard.readText();
+  };
+
+  const restoreEditorSelection = () => {
+    const range = savedRangeRef.current;
+    const sel = window.getSelection();
+    if (range && sel && richEditorRef.current) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+      richEditorRef.current.focus();
+    }
+  };
+
+  const copySelectionText = async (cut: boolean) => {
+    let selected = '';
+    if (isRawSourceMode) {
+      const start = rawSelectionStartRef.current;
+      const end = rawSelectionEndRef.current;
+      if (start !== null && end !== null && end > start) {
+        selected = content.slice(start, end);
+        if (cut) handleContentChange(content.slice(0, start) + content.slice(end));
+      }
+    } else {
+      restoreEditorSelection();
+      selected = window.getSelection()?.toString() || '';
+      if (selected && cut) {
+        document.execCommand('cut');
+        syncRichTextToMarkdown();
+        return;
+      }
+    }
+    if (selected) await clipboardWrite(selected);
+  };
+
+  const pasteClipboard = async () => {
+    const text = await clipboardRead();
+    if (!text) return;
+    if (isRawSourceMode) {
+      const start = rawSelectionStartRef.current ?? content.length;
+      const end = rawSelectionEndRef.current ?? start;
+      handleContentChange(content.slice(0, start) + text + content.slice(end));
+    } else {
+      restoreEditorSelection();
+      document.execCommand('insertText', false, text);
+      syncRichTextToMarkdown();
+    }
   };
 
   const handleRichEditorMouseOut = () => {
@@ -3024,10 +3088,34 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
           className="fixed z-[60] w-56 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-1.5 shadow-xl"
           style={{
             left: Math.max(8, Math.min(toolMenu.x, window.innerWidth - 240)),
-            top: Math.max(8, Math.min(toolMenu.y, window.innerHeight - 380)),
+            top: Math.max(8, Math.min(toolMenu.y, window.innerHeight - 480)),
           }}
           onMouseDown={(e) => e.stopPropagation()}
         >
+          <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-neutral-400">Edit</div>
+          {(
+            [
+              ['Copy', () => void copySelectionText(false)],
+              ['Cut', () => void copySelectionText(true)],
+              ['Paste', () => void pasteClipboard()],
+              ['Undo', () => handleUndo()],
+              ['Redo', () => handleRedo()],
+            ] as [string, () => void][]
+          ).map(([label, action]) => (
+            <button
+              key={label}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                action();
+                setToolMenu(null);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-sky-500 hover:text-white transition-colors"
+            >
+              {label}
+            </button>
+          ))}
+          <div className="my-1 border-t border-neutral-200 dark:border-neutral-700" />
           <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-neutral-400">Tools</div>
           {(
             [
@@ -3044,15 +3132,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
               ['Web link', () => handleInsertWebLink()],
               ['Indent', () => handleIndent()],
               ['Outdent', () => handleOutdent()],
-              ['Undo', () => handleUndo()],
-              ['Redo', () => handleRedo()],
-              [
-                'Copy selection',
-                () => {
-                  const text = window.getSelection()?.toString();
-                  if (text) void navigator.clipboard?.writeText(text);
-                },
-              ],
             ] as [string, () => void][]
           ).map(([label, action]) => (
             <button

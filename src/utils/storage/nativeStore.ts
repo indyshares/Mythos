@@ -240,6 +240,7 @@ async function walk(rel: string, out: string[]): Promise<void> {
   }
   for (const entry of entries) {
     if (entry.name.startsWith('.')) continue;
+    if (rel && entry.name === CONFIG_DIR) continue; // system prompt folder, not a note folder
     const child = rel ? `${rel}/${entry.name}` : entry.name;
     if (entry.isDirectory) {
       out.push(child);
@@ -454,7 +455,7 @@ export async function writeNativeTree(tree: NativeTree): Promise<void> {
     trashed.forEach((rel) => found.push(`${TRASH}/${rel}`));
     for (const rel of found) {
       if (!rel.toLowerCase().endsWith('.md')) continue;
-      if (!desiredFiles.has(rel)) {
+      if (!isConfigPath(rel) && !desiredFiles.has(rel)) {
         try {
           await removeRel(rel);
         } catch {
@@ -463,6 +464,31 @@ export async function writeNativeTree(tree: NativeTree): Promise<void> {
       }
     }
   }
+}
+
+const CONFIG_DIR = 'Configures';
+const AGENTS_FILE = 'AGENTS.md';
+
+function configRel(workspaceName: string): string {
+  return `${sanitizeName(workspaceName)}/${CONFIG_DIR}/${AGENTS_FILE}`;
+}
+
+/** Write the system prompt instructions for a workspace into Configures/AGENTS.md. */
+export async function writeWorkspaceInstructions(workspaceName: string, content: string): Promise<void> {
+  await writeTextRel(configRel(workspaceName), content);
+}
+
+/** Read the system prompt instructions back from disk; null when never saved. */
+export async function readWorkspaceInstructions(workspaceName: string): Promise<string | null> {
+  try {
+    return await readTextRel(configRel(workspaceName));
+  } catch {
+    return null;
+  }
+}
+
+export function isConfigPath(rel: string): boolean {
+  return rel.split('/').includes(CONFIG_DIR);
 }
 
 export function nativeStorageEnabled(): boolean {

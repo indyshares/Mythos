@@ -101,7 +101,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   // Model & Conciseness & Focused Files
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.8-flash');
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.5-flash');
   const [conciseness, setConciseness] = useState<ResponseConciseness>('balanced');
   const [focusedFileIds, setFocusedFileIds] = useState<string[]>([]);
 
@@ -197,7 +197,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
         aiProviders.find((p) => p.isConnected && p.customApiKey) ||
         aiProviders[0] || {
           protocol: 'gemini',
-          defaultModel: 'gemini-3.8-flash',
+          defaultModel: 'gemini-3.5-flash',
         };
 
       const wsFiles = wsActiveFiles.map((f) => ({

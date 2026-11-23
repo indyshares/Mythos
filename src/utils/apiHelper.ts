@@ -51,7 +51,7 @@ export function formatFriendlyErrorMessage(error: any): string {
   }
 
   if (raw.includes('404') || raw.includes('NOT_FOUND')) {
-    return 'โมเดล AI ที่ระบุไม่พร้อมใช้งานในขณะนี้ ระบบแนะนำให้เลือกโมเดล gemini-3.8-flash ในการตั้งค่าครับ';
+    return 'โมเดล AI ที่ระบุไม่พร้อมใช้งานในขณะนี้ ระบบแนะนำให้เลือกโมเดล gemini-3.5-flash ในการตั้งค่าครับ';
   }
 
   if (raw.includes('Failed to fetch') || raw.includes('ECONNRESET') || raw.includes('ETIMEDOUT') || raw.includes('NetworkError') || raw.includes('Network Error')) {

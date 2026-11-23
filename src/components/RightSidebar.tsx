@@ -105,7 +105,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   // Model selection, Conciseness, Context Limits & @file Focused Notes
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.8-flash');
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.5-flash');
   const [conciseness, setConciseness] = useState<ResponseConciseness>('balanced');
   const [focusedFileIds, setFocusedFileIds] = useState<string[]>([]);
 
@@ -204,7 +204,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
         aiProviders.find((p) => p.isConnected && p.customApiKey) ||
         aiProviders[0] || {
           protocol: 'gemini',
-          defaultModel: 'gemini-3.8-flash',
+          defaultModel: 'gemini-3.5-flash',
         };
 
       const wsFiles = wsActiveFiles.map((f) => ({

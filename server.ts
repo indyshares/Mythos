@@ -34,7 +34,7 @@ if (apiKey) {
 
 // Model Resolver ensuring valid active Gemini models
 function resolveGeminiModel(requestedModel?: string): string {
-  if (!requestedModel || !requestedModel.trim()) return 'gemini-3.8-flash';
+  if (!requestedModel || !requestedModel.trim()) return 'gemini-3.5-flash';
   return requestedModel.trim();
 }
 
@@ -106,7 +106,7 @@ function formatFriendlyErrorMessage(error: any): string {
   }
 
   if (raw.includes('404') || raw.includes('NOT_FOUND')) {
-    return 'โมเดล AI ที่ระบุไม่พร้อมใช้งานในขณะนี้ ระบบแนะนำให้เลือกโมเดล gemini-3.8-flash ในการตั้งค่าครับ';
+    return 'โมเดล AI ที่ระบุไม่พร้อมใช้งานในขณะนี้ กรุณาเลือกโมเดลจากรายการในหน้าตั้งค่า';
   }
 
   if (raw.includes('Failed to fetch') || raw.includes('ECONNRESET') || raw.includes('ETIMEDOUT') || raw.includes('NetworkError') || raw.includes('Network Error')) {
@@ -147,7 +147,7 @@ app.get('/api/health', (_req, res) => {
 // Test AI Provider Connection & Dynamic Model Fetching
 app.post('/api/ai/test-connection', async (req, res) => {
   try {
-    const { provider, model, customApiKey, baseUrl } = req.body;
+    const { provider, model, customApiKey, baseUrl, fetchModels } = req.body;
 
     if (provider === 'gemini') {
       const activeKey = customApiKey || apiKey;
@@ -164,17 +164,7 @@ app.post('/api/ai/test-connection', async (req, res) => {
         },
       });
 
-      let availableModels: string[] = [
-        'gemini-3.8-flash',
-        'gemini-3.8-pro',
-        'gemini-2.5-flash',
-        'gemini-2.5-pro',
-        'gemini-2.5-flash-lite',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-flash-latest',
-        'gemini-pro-latest',
-      ];
+      let availableModels: string[] = [];
 
       // Dynamically query Google Gemini models list endpoint if key works
       try {
@@ -193,6 +183,15 @@ app.post('/api/ai/test-connection', async (req, res) => {
         }
       } catch (gErr) {
         console.warn('Failed to query Google Gemini models API:', gErr);
+      }
+
+      if (availableModels.length === 0) {
+        availableModels = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-pro'];
+      }
+
+      // Model discovery only: no generation call, so quota limits do not block setup.
+      if (fetchModels) {
+        return res.json({ success: true, message: 'Gemini models loaded.', models: availableModels });
       }
 
       const targetModel = resolveGeminiModel(model);
@@ -214,7 +213,9 @@ app.post('/api/ai/test-connection', async (req, res) => {
       return res.json({ success: true, message: 'Connected to Google Gemini successfully.', models: availableModels });
     } else {
       // OpenAI / OpenRouter / DeepSeek / Custom Router Provider
-      const targetUrl = baseUrl ? baseUrl.replace(/\/$/, '') : 'https://api.openai.com/v1';
+      const defaultUrl =
+        provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1';
+      const targetUrl = baseUrl ? baseUrl.replace(/\/$/, '') : defaultUrl;
       const key = customApiKey || '';
       let models: string[] = [];
 
@@ -225,7 +226,7 @@ app.post('/api/ai/test-connection', async (req, res) => {
         if (key) {
           headers['Authorization'] = `Bearer ${key}`;
         }
-        if (targetUrl.includes('openrouter')) {
+        if (targetUrl.includes('openrouter') || provider === 'openrouter') {
           headers['HTTP-Referer'] = 'https://mythos.app';
           headers['X-Title'] = 'Mythos Workspace';
         }
@@ -244,10 +245,17 @@ app.post('/api/ai/test-connection', async (req, res) => {
           models = rawList
             .map((m: any) => (typeof m === 'string' ? m : m.id || m.name))
             .filter(Boolean)
-            .slice(0, 100);
+            .slice(0, 300);
         }
       } catch (e) {
         console.warn('Failed to fetch models from provider /models endpoint:', e);
+      }
+
+      if (fetchModels) {
+        if (models.length === 0) {
+          return res.status(401).json({ success: false, message: 'Cannot load models: check API key and base URL.' });
+        }
+        return res.json({ success: true, message: 'Models loaded.', models });
       }
 
       const testModel = model || (models.length > 0 ? models[0] : 'gpt-4o-mini');
@@ -257,7 +265,7 @@ app.post('/api/ai/test-connection', async (req, res) => {
       if (key) {
         testHeaders['Authorization'] = `Bearer ${key}`;
       }
-      if (targetUrl.includes('openrouter')) {
+      if (targetUrl.includes('openrouter') || provider === 'openrouter') {
         testHeaders['HTTP-Referer'] = 'https://mythos.app';
         testHeaders['X-Title'] = 'Mythos Workspace';
       }
@@ -307,7 +315,7 @@ app.post('/api/ai/chat', async (req, res) => {
       conciseness = 'balanced',
       allFiles = [],
       provider = 'gemini',
-      model = 'gemini-3.8-flash',
+      model = 'gemini-3.5-flash',
       customApiKey = '',
       baseUrl = '',
     } = req.body;
@@ -399,13 +407,26 @@ ${workspaceInstructions || 'None provided.'}`;
 
       assistantReply = response.text || 'No response.';
     } else {
-      const targetUrl = baseUrl ? `${baseUrl.replace(/\/$/, '')}/chat/completions` : 'https://api.openai.com/v1/chat/completions';
-      
+      const chatBase = baseUrl
+        ? baseUrl.replace(/\/$/, '')
+        : provider === 'openrouter'
+          ? 'https://openrouter.ai/api/v1'
+          : 'https://api.openai.com/v1';
+      const targetUrl = `${chatBase}/chat/completions`;
+      const chatHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${customApiKey}`,
+      };
+      if (chatBase.includes('openrouter') || provider === 'openrouter') {
+        chatHeaders['HTTP-Referer'] = 'https://mythos.app';
+        chatHeaders['X-Title'] = 'Mythos Workspace';
+      }
+
       const openAiRes = await callWithRetry(
         async () => {
           const res = await fetch(targetUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${customApiKey}` },
+            headers: chatHeaders,
             body: JSON.stringify({
               model: model || 'gpt-4o-mini',
               messages: [
