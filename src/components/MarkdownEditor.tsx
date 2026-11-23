@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { parseMarkdown, serializeMarkdown, calculateStats } from '../utils/markdownParser';
+import { isTauri } from '../utils/permissions';
 import { InternalLinkPickerModal } from './InternalLinkPickerModal';
 import { WebLinkPickerModal } from './WebLinkPickerModal';
 
@@ -271,6 +272,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     element?: HTMLElement;
   }
   const [linkTooltip, setLinkTooltip] = useState<LinkTooltipState | null>(null);
+  const [toolMenu, setToolMenu] = useState<{ x: number; y: number } | null>(null);
   const [isUrlCopied, setIsUrlCopied] = useState(false);
   const [isEditingTooltip, setIsEditingTooltip] = useState(false);
   const [editTooltipTarget, setEditTooltipTarget] = useState('');
@@ -412,6 +414,20 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!toolMenu) return;
+    const close = () => setToolMenu(null);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [toolMenu]);
 
   if (!activeFile) {
     return (
@@ -1791,6 +1807,20 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
       openLinkTooltip('weblink', href, display, rect, anchor);
       return;
     }
+
+    // Desktop: replace the native WebView context menu with the in-app tool menu.
+    if (isTauri()) {
+      e.preventDefault();
+      e.stopPropagation();
+      setToolMenu({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleRawContextMenu = (e: React.MouseEvent) => {
+    if (!isTauri()) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setToolMenu({ x: e.clientX, y: e.clientY });
   };
 
   const handleRichEditorMouseOut = () => {
@@ -2667,6 +2697,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
             <textarea
               ref={textareaRef}
               value={content}
+              onContextMenu={handleRawContextMenu}
               onChange={(e) => handleContentChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Tab') {
@@ -2986,6 +3017,59 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
         onInsertLink={handleSelectWebLink}
         initialSelectedText={selectedTextForLink}
       />
+
+      {/* Desktop tool menu replaces the native WebView right-click menu */}
+      {toolMenu && (
+        <div
+          className="fixed z-[60] w-56 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-1.5 shadow-xl"
+          style={{
+            left: Math.max(8, Math.min(toolMenu.x, window.innerWidth - 240)),
+            top: Math.max(8, Math.min(toolMenu.y, window.innerHeight - 380)),
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-neutral-400">Tools</div>
+          {(
+            [
+              ['Bold', () => applyRichFormat('bold')],
+              ['Italic', () => applyRichFormat('italic')],
+              ['Strikethrough', () => applyRichFormat('strikeThrough')],
+              ['Highlight', () => handleInsertHighlight()],
+              ['Inline code', () => handleInsertInlineCode()],
+              ['Bullet list', () => applyRichFormat('insertUnorderedList')],
+              ['Numbered list', () => applyRichFormat('insertOrderedList')],
+              ['Quote', () => applyRichFormat('formatBlock', 'blockquote')],
+              ['Task checkbox', () => handleInsertTaskCheckbox()],
+              ['Wiki link', () => handleInsertLink()],
+              ['Web link', () => handleInsertWebLink()],
+              ['Indent', () => handleIndent()],
+              ['Outdent', () => handleOutdent()],
+              ['Undo', () => handleUndo()],
+              ['Redo', () => handleRedo()],
+              [
+                'Copy selection',
+                () => {
+                  const text = window.getSelection()?.toString();
+                  if (text) void navigator.clipboard?.writeText(text);
+                },
+              ],
+            ] as [string, () => void][]
+          ).map(([label, action]) => (
+            <button
+              key={label}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                action();
+                setToolMenu(null);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-neutral-700 dark:text-neutral-200 hover:bg-sky-500 hover:text-white transition-colors"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Floating Link Tooltip Popover UI (Desktop Hover & Mobile Long-Press) */}
       {linkTooltip && (
