@@ -22,6 +22,8 @@ export type StorageRoot = {
   /** Absolute path on desktop, relative path under the base directory on Android. */
   path: string;
   label: string;
+  /** When set, only this directory under `path` is treated as a workspace. */
+  singleWorkspace?: string;
 };
 
 export type NativeTree = {
@@ -73,6 +75,19 @@ export async function chooseDesktopRoot(): Promise<StorageRoot | null> {
   });
   if (typeof selected !== 'string') return null;
   return { directory: 'documents', path: selected, label: selected };
+}
+
+/** Pick a folder that becomes the workspace itself. Returns its parent and basename. */
+export async function chooseDesktopFolder(): Promise<{ parent: string; name: string } | null> {
+  const root = await chooseDesktopRoot();
+  if (!root) return null;
+  const { basename, dirname } = await import('@tauri-apps/api/path');
+  return { parent: await dirname(root.path), name: await basename(root.path) };
+}
+
+/** Back to the default Documents/Mythos root. */
+export function resetStorageRoot(): void {
+  setStorageRoot(null);
 }
 
 function isTauri(): boolean {
@@ -250,8 +265,10 @@ export async function readNativeTree(existingWorkspaces: Workspace[] = []): Prom
     return { workspaces, folders, files };
   }
 
+  const onlyWorkspace = getStorageRoot().singleWorkspace;
   for (const rootEntry of roots) {
     if (!rootEntry.isDirectory || rootEntry.name.startsWith('.')) continue;
+    if (onlyWorkspace && rootEntry.name !== onlyWorkspace) continue;
     const wsRel = rootEntry.name;
     const previous = existingWorkspaces.find((w) => w.name === rootEntry.name);
     const wsId = previous?.id || sanitizeName(rootEntry.name);

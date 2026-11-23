@@ -54,7 +54,6 @@ export const TopBar: React.FC<TopBarProps> = ({
     workspaces,
     activeWorkspace,
     setActiveWorkspaceId,
-    createWorkspace,
     updateWorkspace,
     activeView,
     setActiveView,
@@ -65,6 +64,8 @@ export const TopBar: React.FC<TopBarProps> = ({
     canUndo,
     exportWorkspaceAsMarkdownZip,
     refreshStorageRoot,
+    createWorkspaceDefault,
+    createWorkspaceFromFolder,
     language,
     setLanguage,
   } = useWorkspace();
@@ -80,7 +81,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const handleCreateWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWsName.trim()) return;
-    createWorkspace(newWsName.trim());
+    createWorkspaceDefault(newWsName.trim());
     setNewWsName('');
     setIsCreatingWs(false);
     setIsWorkspaceMenuOpen(false);
@@ -242,7 +243,14 @@ export const TopBar: React.FC<TopBarProps> = ({
                   </button>
                 ) : (
                   <form onSubmit={handleCreateWorkspace} className="p-2 space-y-2">
-                    <StorageLocationPicker onChanged={refreshStorageRoot} />
+                    <StorageLocationPicker
+                      onChanged={refreshStorageRoot}
+                      onWorkspaceFolderChosen={(parent, name) => {
+                        createWorkspaceFromFolder(parent, name);
+                        setIsCreatingWs(false);
+                        setIsWorkspaceMenuOpen(false);
+                      }}
+                    />
                     <input
                       type="text"
                       autoFocus

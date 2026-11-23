@@ -24,6 +24,7 @@ import { parseMarkdown, serializeMarkdown, extractInternalLinks } from '../utils
 import { safeFetchJson } from '../utils/apiHelper';
 import {
   getStorageRoot,
+  resetStorageRoot,
   nativeStorageEnabled,
   readNativeTree,
   writeNativeTree,
@@ -37,6 +38,8 @@ interface WorkspaceContextType {
   activeWorkspace: Workspace;
   setActiveWorkspaceId: (id: string) => void;
   createWorkspace: (name: string, description?: string) => Workspace;
+  createWorkspaceDefault: (name: string, description?: string) => Workspace;
+  createWorkspaceFromFolder: (parent: string, name: string) => void;
   updateWorkspace: (id: string, updates: Partial<Workspace>) => void;
   renameWorkspace: (id: string, newName: string) => void;
   deleteWorkspace: (id: string) => void;
@@ -551,6 +554,29 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     handleSwitchWorkspace(id);
     return newWs;
   }, [handleSwitchWorkspace]);
+
+  /** Typed name + Create: always place the workspace under Documents/Mythos. */
+  const createWorkspaceDefault = useCallback(
+    (name: string, description = '') => {
+      resetStorageRoot();
+      return createWorkspace(name, description);
+    },
+    [createWorkspace]
+  );
+
+  /** Picked folder IS the workspace; hydration discovers it and makes it active. */
+  const createWorkspaceFromFolder = useCallback(
+    (_parent: string, _name: string) => {
+      setWorkspaces([]);
+      setFolders([]);
+      setFiles([]);
+      setActiveFileId(null);
+      setTabs([]);
+      setActiveWorkspaceId('');
+      refreshStorageRoot();
+    },
+    [refreshStorageRoot]
+  );
 
   // Update Workspace
   const updateWorkspace = useCallback((id: string, updates: Partial<Workspace>) => {
@@ -1532,6 +1558,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     activeWorkspace,
     setActiveWorkspaceId: handleSwitchWorkspace,
     createWorkspace,
+    createWorkspaceDefault,
+    createWorkspaceFromFolder,
     updateWorkspace,
     renameWorkspace,
     deleteWorkspace,

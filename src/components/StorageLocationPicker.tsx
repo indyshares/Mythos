@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getPlatform } from '../utils/permissions';
 import {
-  chooseDesktopRoot,
+  chooseDesktopFolder,
   getStorageRoot,
   sanitizeName,
   setStorageRoot,
@@ -9,7 +9,13 @@ import {
 } from '../utils/storage/nativeStore';
 
 /** Choose where native apps keep the real workspace folders/.md files. */
-export function StorageLocationPicker({ onChanged }: { onChanged: () => void }) {
+export function StorageLocationPicker({
+  onChanged,
+  onWorkspaceFolderChosen,
+}: {
+  onChanged: () => void;
+  onWorkspaceFolderChosen?: (parent: string, name: string) => void;
+}) {
   const platform = getPlatform();
   const [root, setRoot] = useState<StorageRoot>(() => getStorageRoot());
   const [folderName, setFolderName] = useState(() => getStorageRoot().path);
@@ -26,11 +32,18 @@ export function StorageLocationPicker({ onChanged }: { onChanged: () => void }) 
   const chooseFolder = async () => {
     setBusy(true);
     try {
-      const chosen = await chooseDesktopRoot();
-      if (chosen) {
-        setFolderName(chosen.path);
-        apply(chosen);
-      }
+      const chosen = await chooseDesktopFolder();
+      if (!chosen) return; // cancelled — leave everything untouched
+      const root: StorageRoot = {
+        directory: 'documents',
+        path: chosen.parent,
+        label: chosen.parent,
+        singleWorkspace: chosen.name,
+      };
+      setStorageRoot(root);
+      setRoot(root);
+      setFolderName(chosen.name);
+      onWorkspaceFolderChosen?.(chosen.parent, chosen.name);
     } finally {
       setBusy(false);
     }

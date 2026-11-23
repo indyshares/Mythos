@@ -9,7 +9,7 @@ interface MobileWorkspaceSheetProps {
 }
 
 export const MobileWorkspaceSheet: React.FC<MobileWorkspaceSheetProps> = ({ isOpen, onClose }) => {
-  const { workspaces, activeWorkspace, setActiveWorkspaceId, createWorkspace, updateWorkspace, refreshStorageRoot } = useWorkspace();
+  const { workspaces, activeWorkspace, setActiveWorkspaceId, createWorkspaceDefault, createWorkspaceFromFolder, updateWorkspace, refreshStorageRoot } = useWorkspace();
   const [isCreating, setIsCreating] = useState(false);
   const [editingWsId, setEditingWsId] = useState<string | null>(null);
   const [editingWsName, setEditingWsName] = useState('');
@@ -20,7 +20,7 @@ export const MobileWorkspaceSheet: React.FC<MobileWorkspaceSheetProps> = ({ isOp
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWsName.trim()) return;
-    createWorkspace(newWsName.trim());
+    createWorkspaceDefault(newWsName.trim());
     setNewWsName('');
     setIsCreating(false);
     onClose();
@@ -149,7 +149,14 @@ export const MobileWorkspaceSheet: React.FC<MobileWorkspaceSheetProps> = ({ isOp
             </button>
           ) : (
             <form onSubmit={handleCreate} className="space-y-2">
-              <StorageLocationPicker onChanged={refreshStorageRoot} />
+              <StorageLocationPicker
+                onChanged={refreshStorageRoot}
+                onWorkspaceFolderChosen={(parent, name) => {
+                  createWorkspaceFromFolder(parent, name);
+                  setIsCreating(false);
+                  onClose();
+                }}
+              />
               <input
                 type="text"
                 autoFocus
