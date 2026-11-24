@@ -20,7 +20,7 @@ import {
   PanelLeftClose,
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { isTauri } from '../utils/permissions';
+import { isCapacitor, isTauri } from '../utils/permissions';
 import { useTheme } from '../context/ThemeContext';
 import { Folder, FileItem } from '../types';
 
@@ -89,7 +89,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
   };
 
   const startLongPress = (e: React.TouchEvent, item: ContextItem) => {
-    if (isTauri()) return;
+    if (!isCapacitor()) return; // real mobile app only (not web, not desktop)
     clearLongPress();
     const touch = e.touches[0];
     const x = touch.clientX;
