@@ -31,6 +31,12 @@ import {
   writeNativeTree,
   writeWorkspaceInstructions,
 } from '../utils/storage/nativeStore';
+import {
+  LANGUAGE_STORAGE_KEY,
+  translate,
+  type Lang,
+  type TranslationKey,
+} from '../i18n';
 
 
 interface WorkspaceContextType {
@@ -165,7 +171,7 @@ interface WorkspaceContextType {
   // Language
   language: 'th' | 'en';
   setLanguage: (lang: 'th' | 'en') => void;
-  t: (key: string) => string;
+  t: (key: TranslationKey) => string;
 }
 
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
@@ -236,32 +242,24 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return [];
   });
 
-  const [language, setLanguageState] = useState<'th' | 'en'>(() => {
-    return (localStorage.getItem('mythos_language') as 'th' | 'en') || 'th';
+  const [language, setLanguageState] = useState<Lang>(() => {
+    return (localStorage.getItem(LANGUAGE_STORAGE_KEY) as Lang) || 'th';
   });
 
-  const setLanguage = useCallback((lang: 'th' | 'en') => {
+  const setLanguage = useCallback((lang: Lang) => {
     setLanguageState(lang);
-    localStorage.setItem('mythos_language', lang);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    document.documentElement.lang = lang;
+    window.dispatchEvent(new CustomEvent('mythos-language-change', { detail: lang }));
   }, []);
 
-  const TRANSLATIONS: Record<string, Record<'th' | 'en', string>> = {
-    'app.title': { th: 'มิธอส เวิร์กสเปซ', en: 'Mythos Workspace' },
-    'nav.editor': { th: 'ตัวแก้ไขโน้ต', en: 'Note Editor' },
-    'nav.ai': { th: 'ผู้ช่วย AI', en: 'AI Assistant' },
-    'nav.history': { th: 'ประวัติแชท', en: 'Session History' },
-    'settings.title': { th: 'ตั้งค่าเวิร์กสเปซ', en: 'Workspace Settings' },
-    'settings.aiModels': { th: 'โมเดล AI', en: 'AI Models' },
-    'settings.general': { th: 'ทั่วไป', en: 'General' },
-    'settings.database': { th: 'ฐานข้อมูล', en: 'Database' },
-  };
-
-  const t = useCallback((key: string): string => {
-    if (TRANSLATIONS[key] && TRANSLATIONS[key][language]) {
-      return TRANSLATIONS[key][language];
-    }
-    return key;
+  // Keep the document language/title in sync (no app restart needed — t() is reactive).
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.title = translate(language, 'app.title');
   }, [language]);
+
+  const t = useCallback((key: TranslationKey): string => translate(language, key), [language]);
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [draftAgentMode, setDraftAgentMode] = useState<'ask' | 'build'>('ask');

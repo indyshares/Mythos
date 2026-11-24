@@ -82,6 +82,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
     aiProviders,
     createCustomTemplate,
     setActiveView,
+    t,
   } = useWorkspace();
 
   const [activeTab, setActiveTab] = useState<'ai' | 'backlinks' | 'outline'>('ai');
@@ -490,7 +491,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
           title="Headings Outline"
         >
           <ListTree className="w-3.5 h-3.5" />
-          <span>Outline</span>
+          <span>{t('nav.outline')}</span>
         </button>
       </div>
 
@@ -520,7 +521,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
                     }`}
                   >
                     <Bot className="w-3.5 h-3.5 shrink-0" />
-                    <span>Ask</span>
+                    <span>{t('sidebar.ask')}</span>
                   </button>
 
                   <button
@@ -538,7 +539,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
                     }`}
                   >
                     <Hammer className="w-3.5 h-3.5 shrink-0" />
-                    <span>Build</span>
+                    <span>{t('nav.build')}</span>
                   </button>
                 </div>
 
@@ -550,7 +551,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
                     title="View Chat Session History"
                   >
                     <History className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                    <span>History</span>
+                    <span>{t('nav.history')}</span>
                   </button>
 
                   <button
@@ -558,7 +559,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
                     className="flex items-center gap-1 px-2.5 py-1 bg-sky-500 hover:bg-sky-600 text-white rounded-md text-[11px] font-semibold transition-colors shadow-xs whitespace-nowrap"
                   >
                     <Plus className="w-3.5 h-3.5 shrink-0" />
-                    <span>New</span>
+                    <span>{t('sidebar.new')}</span>
                   </button>
                 </div>
               </div>

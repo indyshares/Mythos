@@ -19,6 +19,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
     permanentDeleteFolder,
     restoreAISession,
     permanentDeleteAISession,
+    t,
   } = useWorkspace();
 
   const [confirmEmpty, setConfirmEmpty] = useState(false);
@@ -57,7 +58,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
             <Trash2 className="w-5 h-5 text-red-500" />
             <div>
               <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                Trash & Recovery (ถังขยะและกู้คืน)
+                {t('trash.title')}
               </h3>
               <p className="text-xs text-neutral-500">
                 {trashedFiles.length} files, {trashedFolders.length} folders, {trashedSessions.length} AI sessions
@@ -69,12 +70,12 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
             {totalTrashed > 0 && (
               confirmEmpty ? (
                 <div className="flex items-center gap-1.5 animate-in fade-in">
-                  <span className="text-[11px] text-red-500 font-bold hidden sm:inline">ลบถาวรทั้งหมด?</span>
+                  <span className="text-[11px] text-red-500 font-bold hidden sm:inline">{t('trash.permanentDelete')}?</span>
                   <button
                     onClick={handleEmptyTrash}
                     className="px-2.5 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded transition-colors shadow-xs"
                   >
-                    ยืนยันล้างถังขยะ
+                    {t('trash.emptyTrash')}
                   </button>
                   <button
                     onClick={() => setConfirmEmpty(false)}
@@ -105,7 +106,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-y-auto p-4 space-y-2 text-xs">
           {totalTrashed === 0 ? (
             <div className="py-12 text-center text-neutral-400 space-y-1">
-              <p className="font-medium text-neutral-600 dark:text-neutral-300">Trash is empty</p>
+              <p className="font-medium text-neutral-600 dark:text-neutral-300">{t('trash.trashEmpty')}</p>
               <p className="text-[11px] text-neutral-500">
                 Deleted notes, folders, and AI sessions are stored here before being permanently purged.
               </p>
@@ -146,7 +147,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
                           title="กู้คืนเซสชันนี้กลับไปยังประวัติ"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
-                          <span>กู้คืน</span>
+                          <span>{t('trash.restore')}</span>
                         </button>
                         <button
                           onClick={() => permanentDeleteAISession(session.id)}
@@ -189,7 +190,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
                           title="Restore folder and all items"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Restore</span>
+                          <span>{t('trash.restore')}</span>
                         </button>
                         <button
                           onClick={() => permanentDeleteFolder(folder.id)}
@@ -232,7 +233,7 @@ export const TrashModal: React.FC<TrashModalProps> = ({ isOpen, onClose }) => {
                           title="Restore note"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Restore</span>
+                          <span>{t('trash.restore')}</span>
                         </button>
                         <button
                           onClick={() => permanentDeleteFile(file.id)}

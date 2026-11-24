@@ -71,6 +71,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     createWorkspaceFromFolder,
     language,
     setLanguage,
+    t,
   } = useWorkspace();
 
   const { activeAccentHex } = useTheme();
@@ -148,7 +149,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             onClick={handleWorkspaceButtonClick}
             className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition-colors max-w-[130px] sm:max-w-[190px] md:max-w-[240px]"
-            title="Switch or create workspace"
+            title={t('workspace.switchOrCreate')}
           >
             <FolderKanban
               className="w-3.5 h-3.5 shrink-0"
@@ -242,7 +243,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                     className="w-full text-left px-3 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-1.5 transition-colors font-medium"
                   >
                     <Plus className="w-3.5 h-3.5 text-sky-500" />
-                    <span>Create New Workspace</span>
+                    <span>{t('workspace.createNew')}</span>
                   </button>
                 ) : (
                   <form onSubmit={handleCreateWorkspace} className="p-2 space-y-2">
@@ -257,7 +258,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                     <input
                       type="text"
                       autoFocus
-                      placeholder="Workspace name..."
+                      placeholder={t('workspace.namePlaceholder')}
                       value={newWsName}
                       onChange={(e) => setNewWsName(e.target.value)}
                       className="w-full px-2 py-1 text-xs bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-sky-500"
@@ -395,7 +396,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={exportWorkspaceAsMarkdownZip}
           className="hidden md:flex p-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
-          title="Export Workspace (.md)"
+          title={t('nav.export')}
         >
           <Download className="w-4 h-4" />
         </button>
@@ -404,7 +405,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={onOpenTrash}
           className="hidden md:flex p-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
-          title="Trash & Deleted Files"
+          title={t('nav.trash')}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -413,7 +414,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={onOpenSettings}
           className="p-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
-          title="Workspace Settings & AI Instructions"
+          title={t('nav.workspaceSettings')}
         >
           <Settings className="w-4 h-4" />
         </button>
@@ -432,7 +433,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
           className="px-2 py-1 text-xs font-mono font-bold rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition-colors flex items-center gap-1 shadow-2xs"
-          title="สลับภาษา (Switch Language: TH / EN)"
+          title={t('common.switchLanguage')}
         >
           <span>🌐</span>
           <span>{language.toUpperCase()}</span>

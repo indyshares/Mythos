@@ -78,6 +78,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
     setActiveView,
     getBacklinks,
     openFileInTab,
+    t,
   } = useWorkspace();
 
   const [activeTab, setActiveTab] = useState<'ai' | 'links' | 'outline'>('ai');
@@ -451,7 +452,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
              }`}
            >
              <Hammer className="w-4 h-4" />
-             <span>Build</span>
+             <span>{t('nav.build')}</span>
            </button>
         </div>
 
@@ -603,7 +604,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
                                   className="px-4 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-sky-500/20"
                                 >
                                   <Send className="w-3 h-3" />
-                                  <span>ถามใหม่</span>
+                                  <span>{t('sidebar.new')}</span>
                                 </button>
                               </div>
                             </div>
@@ -623,7 +624,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
                             title="ยกเลิกคำขอนี้และหยุดการสร้างคำตอบ"
                           >
                             <Ban className="w-3.5 h-3.5" />
-                            <span>ยกเลิก</span>
+                            <span>{t('common.cancel')}</span>
                           </button>
                         </div>
                       )}
@@ -651,7 +652,7 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
                       <Zap className="w-4 h-4 animate-pulse text-sky-500" />
                       <span className="text-[11px] font-bold text-neutral-500 italic">Thinking...</span>
                    </div>
-                   <button onClick={handleStopGeneration} className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black transition-all">STOP</button>
+                   <button onClick={handleStopGeneration} className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black transition-all">{t('sidebar.stop')}</button>
                 </div>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getPlatform } from '../utils/permissions';
+import { useWorkspace } from '../context/WorkspaceContext';
 import {
   chooseDesktopFolder,
   getStorageRoot,
@@ -16,6 +17,7 @@ export function StorageLocationPicker({
   onChanged: () => void;
   onWorkspaceFolderChosen?: (parent: string, name: string) => void;
 }) {
+  const { t } = useWorkspace();
   const platform = getPlatform();
   const [root, setRoot] = useState<StorageRoot>(() => getStorageRoot());
   const [folderName, setFolderName] = useState(() => getStorageRoot().path);
@@ -56,9 +58,9 @@ export function StorageLocationPicker({
 
   return (
     <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-2 space-y-2 text-[11px]">
-      <div className="font-medium text-neutral-600 dark:text-neutral-300">Storage location</div>
+      <div className="font-medium text-neutral-600 dark:text-neutral-300">{t('storage.title')}</div>
       <div className="text-neutral-500 dark:text-neutral-400 truncate" title={root.label}>
-        Current: {root.label}
+        {t('storage.current')}: {root.label}
       </div>
 
       {platform === 'tauri' ? (
@@ -68,7 +70,7 @@ export function StorageLocationPicker({
           onClick={chooseFolder}
           className="px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 hover:bg-sky-500 hover:text-white transition-colors disabled:opacity-50"
         >
-          {busy ? 'Choosing…' : 'Choose folder…'}
+          {busy ? t('common.loading') : t('storage.chooseFolder')}
         </button>
       ) : (
         <div className="space-y-2">
@@ -76,15 +78,15 @@ export function StorageLocationPicker({
             type="text"
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
-            placeholder="Folder name"
+            placeholder={t('common.folderName')}
             className="w-full px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700"
           />
           <div className="flex flex-wrap gap-1.5">
             {(
               [
-                ['documents', 'Documents'],
-                ['externalstorage', 'External storage'],
-                ['data', 'App private'],
+                ['documents', t('storage.documents')],
+                ['externalstorage', t('storage.external')],
+                ['data', t('storage.private')],
               ] as const
             ).map(([directory, label]) => (
               <button

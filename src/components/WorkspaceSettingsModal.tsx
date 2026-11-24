@@ -58,6 +58,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
     updateDbConfig,
     syncToDatabase,
     exportWorkspaceAsMarkdownZip,
+    t,
   } = useWorkspace();
 
   const { isDarkMode, setIsDarkMode, activeAccentHex } = useTheme();
@@ -281,7 +282,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-100">
-                Workspace Settings
+                {t('settings.title')}
               </h3>
               <p className="text-[11px] text-neutral-500">จัดการธีมสี, ฐานข้อมูล และคำสั่ง AI</p>
             </div>
@@ -297,23 +298,23 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
         {/* Tabs */}
         <div className="flex border-b border-neutral-200 dark:border-neutral-800 px-3 sm:px-6 gap-2 sm:gap-6 text-xs font-bold overflow-x-auto no-scrollbar shrink-0 bg-white dark:bg-neutral-900">
           {[
-            { id: 'general', icon: Layers, label: 'General' },
-            { id: 'database', icon: Database, label: 'Database' },
-            { id: 'ai-instructions', icon: Bot, label: 'AI Prompt' },
-            { id: 'providers', icon: Sliders, label: 'AI Models' },
-            { id: 'export', icon: Download, label: 'Export' },
-          ].map((t) => (
+            { id: 'general', icon: Layers, label: t('settings.tabGeneral') },
+            { id: 'database', icon: Database, label: t('settings.tabDatabase') },
+            { id: 'ai-instructions', icon: Bot, label: t('settings.tabAIPrompt') },
+            { id: 'providers', icon: Sliders, label: t('settings.tabProviders') },
+            { id: 'export', icon: Download, label: t('settings.tabExport') },
+          ].map((tab) => (
             <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as any)}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
               className={`min-h-[48px] py-3 px-1 border-b-2 transition-all flex items-center gap-2 shrink-0 ${
-                activeTab === t.id
+                activeTab === tab.id
                   ? 'border-sky-500 text-sky-500'
                   : 'border-transparent text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
               }`}
             >
-              <t.icon className={`w-4 h-4 ${activeTab === t.id ? 'text-sky-500' : ''}`} />
-              <span className="whitespace-nowrap">{t.label}</span>
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-sky-500' : ''}`} />
+              <span className="whitespace-nowrap">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -346,7 +347,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                 </div>
                 <div className="flex justify-end">
                   <button type="submit" className="min-h-[48px] px-8 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95">
-                    Save General Changes
+                    {t('settings.saveGeneral')}
                   </button>
                 </div>
               </form>
@@ -965,7 +966,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center"><Bot className="w-5 h-5" /></div>
                   <div>
-                    <h4 className="text-sm font-bold">System Prompt Instructions</h4>
+                    <h4 className="text-sm font-bold">{t('settings.systemPrompt')}</h4>
                     <p className="text-[11px] text-neutral-500">กำหนดพฤติกรรมและการตอบกลับของ AI ในเวิร์กสเปซนี้</p>
                   </div>
                 </div>
@@ -1004,7 +1005,7 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
                       <p className="text-[10px] text-neutral-500 mt-1">ส่งออกเป็นไฟล์ .md ตามโครงสร้างโฟลเดอร์ ใช้งานร่วมกับ Obsidian, Notion หรือ VS Code ได้ทันที</p>
                     </div>
                   </div>
-                  <button onClick={exportWorkspaceAsMarkdownZip} className="mt-8 h-12 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 font-bold rounded-xl text-xs hover:bg-sky-500 hover:text-white transition-all">Download ZIP Archive</button>
+                  <button onClick={exportWorkspaceAsMarkdownZip} className="mt-8 h-12 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 font-bold rounded-xl text-xs hover:bg-sky-500 hover:text-white transition-all">{t('settings.exportZip')}</button>
                 </div>
               </div>
             </div>

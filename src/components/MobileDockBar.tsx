@@ -8,16 +8,16 @@ interface MobileDockBarProps {
 }
 
 export const MobileDockBar: React.FC<MobileDockBarProps> = ({ onNavigate }) => {
-  const { activeView, setActiveView } = useWorkspace();
+  const { activeView, setActiveView, t } = useWorkspace();
   const { activeAccentHex } = useTheme();
 
   const menuItems = [
-    { id: 'editor', name: 'Editor', icon: FileText, panelIndex: 1 },
-    { id: 'timeline', name: 'Timeline', icon: Calendar, panelIndex: 1 },
-    { id: 'graph', name: 'Graph', icon: GitBranch, panelIndex: 1 },
-    { id: 'templates', name: 'Templates', icon: Layers, panelIndex: 1 },
-    { id: 'sessions', name: 'History', icon: History, panelIndex: 1 },
-    { id: 'ai', name: 'AI Chat', icon: Bot, panelIndex: 2 },
+    { id: 'editor', name: t('nav.editor'), icon: FileText, panelIndex: 1 },
+    { id: 'timeline', name: t('nav.timeline'), icon: Calendar, panelIndex: 1 },
+    { id: 'graph', name: t('nav.graph'), icon: GitBranch, panelIndex: 1 },
+    { id: 'templates', name: t('nav.templates'), icon: Layers, panelIndex: 1 },
+    { id: 'sessions', name: t('nav.sessions'), icon: History, panelIndex: 1 },
+    { id: 'ai', name: t('nav.ai'), icon: Bot, panelIndex: 2 },
   ] as const;
 
   return (

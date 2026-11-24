@@ -52,6 +52,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
     bulkDelete,
     setItemToMove,
     setIsMoveDialogOpen,
+    t,
   } = useWorkspace();
   const { activeAccentHex } = useTheme();
 
@@ -566,8 +567,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                         <FileText className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col items-start">
-                         <span className="font-bold">New Blank Note</span>
-                         <span className="text-[9px] text-neutral-400">Start from scratch</span>
+                         <span className="font-bold">{t('explorer.newBlankNote')}</span>
+                         <span className="text-[9px] text-neutral-400">{t('explorer.startFromScratch')}</span>
                       </div>
                     </button>
                     <button
@@ -581,8 +582,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                         <Files className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col items-start">
-                         <span className="font-bold">From Template</span>
-                         <span className="text-[9px] text-neutral-400">Use pre-defined structure</span>
+                         <span className="font-bold">{t('explorer.fromTemplate')}</span>
+                         <span className="text-[9px] text-neutral-400">{t('explorer.predefinedStructure')}</span>
                       </div>
                     </button>
                     <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800 my-1" />
@@ -599,8 +600,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                         <FolderPlus className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col items-start">
-                         <span className="font-bold">New Folder</span>
-                         <span className="text-[9px] text-neutral-400">Organize your files</span>
+                         <span className="font-bold">{t('explorer.newFolder')}</span>
+                         <span className="text-[9px] text-neutral-400">{t('explorer.organizeFiles')}</span>
                       </div>
                     </button>
                   </div>
@@ -633,7 +634,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-neutral-400" />
           <input
             type="text"
-            placeholder="Filter files..."
+            placeholder={t('explorer.filter')}
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-sky-500"
@@ -652,7 +653,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                 className="flex items-center gap-1 px-2 py-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-950 rounded"
               >
                 <Trash2 className="w-3 h-3" />
-                <span>Delete</span>
+                <span>{t('common.delete')}</span>
               </button>
             </div>
           </div>
@@ -677,7 +678,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
         >
           <div className="flex items-center gap-1.5 text-neutral-500 font-medium">
             <Home className="w-3.5 h-3.5 text-sky-500" />
-            <span>Root (/)</span>
+            <span>{t('common.root')}</span>
           </div>
           
           <div className="flex items-center gap-1">
@@ -807,7 +808,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
               className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 text-neutral-700 dark:text-neutral-300"
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Open</span>
+              <span>{t('common.open')}</span>
             </button>
 
             {contextMenu.item.type === 'file' && (
@@ -819,7 +820,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                 className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 text-neutral-700 dark:text-neutral-300"
               >
                 <Copy className="w-3.5 h-3.5" />
-                <span>Copy Link [[Note]]</span>
+                <span>{t('common.copyLink')}</span>
               </button>
             )}
 
@@ -832,7 +833,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
               className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 text-neutral-700 dark:text-neutral-300"
             >
               <FolderInput className="w-3.5 h-3.5" />
-              <span>Move to...</span>
+              <span>{t('common.moveTo')}</span>
             </button>
 
             <button
@@ -845,7 +846,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
               className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 text-neutral-700 dark:text-neutral-300"
             >
               <Edit2 className="w-3.5 h-3.5" />
-              <span>Rename</span>
+              <span>{t('common.rename')}</span>
             </button>
 
             {contextMenu.item.type === 'file' && (
@@ -857,7 +858,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                 className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 text-neutral-700 dark:text-neutral-300"
               >
                 <Files className="w-3.5 h-3.5" />
-                <span>Duplicate</span>
+                <span>{t('common.duplicate')}</span>
               </button>
             )}
 
@@ -875,7 +876,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
               className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center gap-2"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Move to Trash</span>
+              <span>{t('common.moveToTrash')}</span>
             </button>
           </div>
         </>
