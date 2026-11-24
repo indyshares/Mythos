@@ -334,14 +334,16 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Effect to load secure credentials from IndexedDB and verify server AI key
   useEffect(() => {
     const loadSecureData = async () => {
-      let serverHasGemini = true; // default optimistic
+      let serverHasGemini = false; // never assume a key exists before health confirms it
       try {
         const healthRes = await fetch('/api/health');
         if (healthRes.ok) {
           const healthData = await healthRes.json();
           serverHasGemini = Boolean(healthData.hasGeminiKey);
         }
-      } catch {}
+      } catch {
+        // Production native apps have no local server; keys come from IndexedDB only.
+      }
 
       try {
         const updatedProviders = await Promise.all(
@@ -502,6 +504,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     localStorage.setItem(STORAGE_KEYS.OPERATIONS, JSON.stringify(operations));
   }, [operations]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_TEMPLATES, JSON.stringify(customTemplates));
+  }, [customTemplates]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TEMPLATE_CATEGORIES, JSON.stringify(templateCategories));
+  }, [templateCategories]);
+
   // Active Workspace
   const activeWorkspace = useMemo(() => {
     return (
@@ -574,9 +584,16 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const createWorkspaceDefault = useCallback(
     (name: string, description = '') => {
       resetStorageRoot();
+      setWorkspaces([]);
+      setFolders([]);
+      setFiles([]);
+      setActiveFileId(null);
+      setTabs([]);
+      setActiveWorkspaceId('');
+      refreshStorageRoot();
       return createWorkspace(name, description);
     },
-    [createWorkspace]
+    [createWorkspace, refreshStorageRoot]
   );
 
   /** Picked folder IS the workspace; hydration discovers it and makes it active. */
@@ -1443,6 +1460,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           availableModels: models,
           defaultModel: provider.defaultModel || models[0] || '',
         });
+      } else {
+        updateAIProvider(id, { isConnected: false });
       }
 
       return data;

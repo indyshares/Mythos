@@ -452,7 +452,7 @@ export async function writeNativeTree(tree: NativeTree): Promise<void> {
     await walk(wsRel, found);
     const trashed: string[] = [];
     await walk(`${wsRel}/${TRASH}`, trashed);
-    trashed.forEach((rel) => found.push(`${TRASH}/${rel}`));
+    trashed.forEach((rel) => found.push(rel)); // walk() already returns the full .trash path
     for (const rel of found) {
       if (!rel.toLowerCase().endsWith('.md')) continue;
       if (!isConfigPath(rel) && !desiredFiles.has(rel)) {

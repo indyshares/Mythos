@@ -167,6 +167,7 @@ function WorkspaceApp() {
                 onOpenSettings={() => setIsSettingsOpen(true)}
                 onOpenTrash={() => setIsTrashOpen(true)}
                 onOpenWorkspaceSheet={() => setIsWorkspaceSheetOpen(true)}
+                onOpenMore={() => setIsMoreMenuOpen(true)}
                 isLeftSidebarOpen={true}
               />
               <div className="flex-1 min-h-0">

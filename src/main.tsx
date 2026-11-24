@@ -1,18 +1,21 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary';
+import { isWeb } from './utils/permissions';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
 
-registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    console.log('New content available, reloading...');
-  },
-  onOfflineReady() {
-    console.log('Mythos PWA ready to work offline');
-  },
-});
+if (isWeb()) {
+  registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      console.log('New content available, reloading...');
+    },
+    onOfflineReady() {
+      console.log('Mythos PWA ready to work offline');
+    },
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>

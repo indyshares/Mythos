@@ -77,6 +77,11 @@ export const WorkspaceSettingsModal: React.FC<WorkspaceSettingsModalProps> = ({
     setInstructionsText(workspaceInstructions.content || '');
   }, [workspaceInstructions.content]);
 
+  useEffect(() => {
+    setWsName(activeWorkspace.name);
+    setWsDesc(activeWorkspace.description);
+  }, [activeWorkspace.id, activeWorkspace.name, activeWorkspace.description]);
+
   // Database state
   const [dbType, setDbType] = useState<DatabaseType>(dbConfig.type);
   const [dbForm, setDbForm] = useState(dbConfig);

@@ -252,6 +252,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
   const [selectedTextForLink, setSelectedTextForLink] = useState('');
   const [showMarkdownGuide, setShowMarkdownGuide] = useState(false);
   const [showToolbar, setShowToolbar] = useState(true);
+  const [toolGroup, setToolGroup] = useState<'format' | 'block' | 'insert' | 'more' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [replaceQuery, setReplaceQuery] = useState('');
   const [isRawSourceMode, setIsRawSourceMode] = useState(false);
@@ -414,6 +415,15 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!toolGroup) return;
+    const close = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('[data-tool-menu]')) setToolGroup(null);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [toolGroup]);
 
   useEffect(() => {
     if (!toolMenu) return;
@@ -1936,578 +1946,154 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     setTimeout(() => setIsUrlCopied(false), 2000);
   };
 
+  type ToolItem = { label: string; icon: React.ReactNode; action: () => void; title?: string };
+  const openSaveTemplate = () => {
+    setTemplateName(activeFile.name.replace(/\.md$/, ''));
+    setTemplateDesc(`Template created from ${activeFile.name}`);
+    setShowSaveTemplateModal(true);
+  };
+  const toolGroups: Record<'format' | 'block' | 'insert' | 'more', ToolItem[]> = {
+    format: [
+      { label: 'Bold', icon: <Bold className="w-4 h-4" />, action: () => applyRichFormat('bold'), title: 'Ctrl+B' },
+      { label: 'Italic', icon: <Italic className="w-4 h-4" />, action: () => applyRichFormat('italic'), title: 'Ctrl+I' },
+      { label: 'Strikethrough', icon: <Strikethrough className="w-4 h-4" />, action: () => applyRichFormat('strikeThrough') },
+      { label: 'Highlight', icon: <Highlighter className="w-4 h-4" />, action: () => handleInsertHighlight() },
+      { label: 'Inline code', icon: <Code className="w-4 h-4" />, action: () => handleInsertInlineCode() },
+    ],
+    block: [
+      { label: 'Heading 1', icon: <Heading1 className="w-4 h-4" />, action: () => applyRichFormat('formatBlock', '<h1>') },
+      { label: 'Heading 2', icon: <Heading2 className="w-4 h-4" />, action: () => applyRichFormat('formatBlock', '<h2>') },
+      { label: 'Heading 3', icon: <Heading3 className="w-4 h-4" />, action: () => applyRichFormat('formatBlock', '<h3>') },
+      { label: 'Bullet list', icon: <List className="w-4 h-4" />, action: () => applyRichFormat('insertUnorderedList') },
+      { label: 'Numbered list', icon: <ListOrdered className="w-4 h-4" />, action: () => applyRichFormat('insertOrderedList') },
+      { label: 'Task checkbox', icon: <CheckSquare className="w-4 h-4" />, action: () => handleInsertTaskCheckbox() },
+      { label: 'Quote', icon: <Quote className="w-4 h-4" />, action: () => applyRichFormat('formatBlock', '<blockquote>') },
+      { label: 'Indent', icon: <Indent className="w-4 h-4" />, action: () => handleIndent(), title: 'Tab' },
+      { label: 'Outdent', icon: <Outdent className="w-4 h-4" />, action: () => handleOutdent(), title: 'Shift+Tab' },
+    ],
+    insert: [
+      { label: 'Wiki link [[ ]]', icon: <Link2 className="w-4 h-4" />, action: () => handleInsertLink() },
+      { label: 'Web link', icon: <Globe className="w-4 h-4" />, action: () => handleInsertWebLink() },
+    ],
+    more: [
+      { label: 'Save as Template', icon: <Bookmark className="w-4 h-4" />, action: openSaveTemplate },
+      { label: 'MD Guide', icon: <HelpCircle className="w-4 h-4" />, action: () => setShowMarkdownGuide(true) },
+      ...(onOpenInspector
+        ? [{ label: 'Inspector', icon: <Sliders className="w-4 h-4" />, action: () => onOpenInspector() }]
+        : []),
+      { label: 'Hide toolbar', icon: <EyeOff className="w-4 h-4" />, action: () => setShowToolbar(false) },
+    ],
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-neutral-900 overflow-hidden relative">
       {/* MS Word / Notion Style Formatting Toolbar */}
       {showToolbar && (
-        <>
-          {/* DESKTOP TOOLBAR (lg:flex) */}
-          <div className="hidden lg:flex min-h-11 border-b border-neutral-200 dark:border-neutral-800 px-3 py-1.5 items-center justify-between gap-y-1.5 gap-x-2 shrink-0 bg-neutral-50/80 dark:bg-neutral-950/80 select-none flex-wrap max-w-full">
-            {/* Formatting Actions */}
-            <div className="flex items-center gap-y-1.5 gap-x-1 py-0.5 flex-wrap flex-1 min-w-0 max-w-full">
-              {/* Mode Switcher: Rich WYSIWYG vs Raw Markdown */}
-              <button
-                type="button"
-                onClick={toggleSourceMode}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg font-medium transition-colors shrink-0 ${
-                  isRawSourceMode
-                    ? 'bg-sky-500 text-white shadow-xs'
-                    : 'bg-neutral-200/70 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300/80 dark:hover:bg-neutral-700'
-                }`}
-                title={isRawSourceMode ? 'Switch to Rich Text WYSIWYG (Ctrl+M)' : 'Switch to Raw Markdown Source Mode (Ctrl+M)'}
-              >
-                {isRawSourceMode ? (
-                  <>
-                    <Code className="w-3.5 h-3.5" />
-                    <span className="font-mono">Raw MD</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-                    <span>Rich Text</span>
-                  </>
-                )}
-              </button>
+        <div className="tool-menu-root shrink-0 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-950/30" data-tool-menu>
+          <div className="h-11 flex items-center gap-1 px-2 sm:px-3">
+            <button
+              type="button"
+              onClick={toggleSourceMode}
+              title={isRawSourceMode ? 'Switch to Rich Text' : 'Switch to Raw Markdown'}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors shrink-0"
+            >
+              {isRawSourceMode ? <Sparkles className="w-4 h-4" /> : <Code className="w-4 h-4" />}
+              <span className="hidden sm:inline text-xs font-medium">
+                {isRawSourceMode ? 'Rich Text' : 'Raw MD'}
+              </span>
+            </button>
 
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
+            <button type="button" onClick={handleUndo} title="Undo (Ctrl+Z)" className="p-1.5 rounded-md text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"><Undo className="w-4 h-4" /></button>
+            <button type="button" onClick={handleRedo} title="Redo (Ctrl+Shift+Z)" className="p-1.5 rounded-md text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"><Redo className="w-4 h-4" /></button>
 
-              <button
-                type="button"
-                onClick={handleUndo}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Undo (Ctrl+Z)"
-              >
-                <Undo className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleRedo}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Redo (Ctrl+Y)"
-              >
-                <Redo className="w-4 h-4" />
-              </button>
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
 
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<h1>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Heading 1 (or type '# ')"
-              >
-                <Heading1 className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<h2>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Heading 2 (or type '## ')"
-              >
-                <Heading2 className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<h3>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Heading 3 (or type '### ')"
-              >
-                <Heading3 className="w-4 h-4" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              <button
-                type="button"
-                onClick={() => applyRichFormat('bold')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Bold (or type '**text**' / Ctrl+B)"
-              >
-                <Bold className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('italic')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Italic (or type '*text*' / Ctrl+I)"
-              >
-                <Italic className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('strikeThrough')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Strikethrough (or type '~~text~~')"
-              >
-                <Strikethrough className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleInsertHighlight}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Highlight (or type '==text==')"
-              >
-                <Highlighter className="w-4 h-4 text-amber-500" />
-              </button>
-              <button
-                type="button"
-                onClick={handleInsertInlineCode}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-sky-600 dark:text-sky-400 transition-colors"
-                title="Inline Code (or type '`code`')"
-              >
-                <Code className="w-4 h-4" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              <button
-                type="button"
-                onClick={() => applyRichFormat('insertUnorderedList')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Bullet list (or type '- ' or '* ')"
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('insertOrderedList')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Numbered list (or type '1. ')"
-              >
-                <ListOrdered className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleInsertTaskCheckbox}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Task Checkbox (or type '- [ ] ')"
-              >
-                <CheckSquare className="w-4 h-4 text-sky-500" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<blockquote>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Blockquote (or type '> ')"
-              >
-                <Quote className="w-4 h-4" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              {/* Tab Indent & Outdent buttons */}
-              <button
-                type="button"
-                onClick={handleIndent}
-                className="flex items-center gap-1 px-2 py-1 text-xs hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-md transition-colors font-medium shrink-0"
-                title="Tab / ย่อหน้า (Tab)"
-              >
-                <Indent className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Tab</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleOutdent}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="ยกเลิกการเยื้อง (Shift+Tab)"
-              >
-                <Outdent className="w-4 h-4" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              <button
-                type="button"
-                onClick={handleInsertLink}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium hover:border-sky-500 rounded-md transition-colors shrink-0"
-                title="Insert Internal Link [[Note]] (or type '[[Note]]' / Ctrl+K)"
-              >
-                <Link2 className="w-3.5 h-3.5 text-sky-500" />
-                <span>WikiLink</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleInsertWebLink}
-                className="flex items-center gap-1 px-2 py-1 text-xs hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-md transition-colors font-medium shrink-0"
-                title="Insert External Web Link (URL + Custom Title)"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>WebLink</span>
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-1 shrink-0" />
-
-              {/* In-Editor Find & Replace */}
-              <button
-                type="button"
-                onClick={() => setShowSearchReplace(!showSearchReplace)}
-                className={`p-1.5 rounded-md transition-colors shrink-0 ${
-                  showSearchReplace
-                    ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
-                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
-                }`}
-                title="Find & Replace text"
-              >
-                <Search className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTemplateName(activeFile.name.replace(/\.md$/, ''));
-                  setTemplateDesc(`Template created from ${activeFile.name}`);
-                  setShowSaveTemplateModal(true);
-                }}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-md transition-colors font-medium ml-1 shrink-0"
-                title="Save this note structure as a Template"
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                <span>Save as Template</span>
-              </button>
-            </div>
-
-            {/* Right Controls */}
-            <div className="flex items-center gap-1.5 shrink-0 flex-wrap ml-auto">
-              <button
-                type="button"
-                onClick={() => setShowMarkdownGuide(!showMarkdownGuide)}
-                className={`flex items-center gap-1 px-2 py-1 text-xs rounded-md font-medium transition-colors ${
-                  showMarkdownGuide
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-neutral-200/50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                }`}
-                title="Markdown Syntax Guide & Shortcuts"
-              >
-                <HelpCircle className="w-3.5 h-3.5" />
-                <span>MD Guide</span>
-              </button>
-
-              {onOpenInspector && (
+            {(['format', 'block', 'insert'] as const).map((group) => (
+              <div className="relative" key={group}>
                 <button
                   type="button"
-                  onClick={onOpenInspector}
-                  className="p-1.5 rounded-md text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors shrink-0"
-                  title="Document Info & Inspector"
+                  onClick={() => setToolGroup(toolGroup === group ? null : group)}
+                  title={group[0].toUpperCase() + group.slice(1)}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    toolGroup === group
+                      ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
+                      : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                  }`}
                 >
-                  <Sliders className="w-4 h-4 text-sky-500" />
+                  {group === 'format' ? <Pencil className="w-4 h-4" /> : group === 'block' ? <List className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                  <span className="hidden sm:inline capitalize">{group}</span>
+                  <ChevronDown className="w-3 h-3 opacity-60" />
                 </button>
-              )}
+                {toolGroup === group && (
+                  <div className="absolute left-0 top-full z-40 mt-1 w-52 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-1.5 shadow-xl">
+                    {toolGroups[group].map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        title={item.title}
+                        onClick={() => {
+                          item.action();
+                          setToolGroup(null);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-left text-xs text-neutral-700 dark:text-neutral-200 hover:bg-sky-500 hover:text-white transition-colors"
+                      >
+                        <span className="opacity-70">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
-              <button
-                type="button"
-                onClick={() => setShowToolbar(false)}
-                className="p-1.5 rounded-md text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-colors"
-                title="Hide Toolbar (Pure Markdown Focus Mode)"
-              >
-                <EyeOff className="w-4 h-4" />
-              </button>
-
+            <div className="ml-auto flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setShowSearchReplace(!showSearchReplace)}
+                title="Find & Replace"
                 className={`p-1.5 rounded-md transition-colors ${
                   showSearchReplace
-                    ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
-                    : 'text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
+                    : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800'
                 }`}
-                title="Search and Replace"
-              >
-                <Search className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* MOBILE TOOLBAR (flex lg:hidden) - NO HORIZONTAL SCROLL! */}
-          <div className="flex lg:hidden h-11 border-b border-neutral-200 dark:border-neutral-800 px-2 items-center justify-between gap-1 shrink-0 bg-neutral-50/80 dark:bg-neutral-950/80 select-none overflow-hidden w-full">
-            {/* Primary mobile buttons fitting inside the viewport */}
-            <div className="flex items-center gap-1 overflow-hidden shrink min-w-0">
-              {/* Mode Toggle icon */}
-              <button
-                type="button"
-                onClick={toggleSourceMode}
-                className={`p-1.5 rounded-lg transition-colors shrink-0 ${
-                  isRawSourceMode
-                    ? 'bg-sky-500 text-white shadow-xs'
-                    : 'bg-neutral-200/70 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
-                }`}
-                title={isRawSourceMode ? 'Switch to Rich Text' : 'Switch to Raw Markdown'}
-              >
-                {isRawSourceMode ? <Code className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-sky-500" />}
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-0.5 shrink-0" />
-
-              {/* Undo */}
-              <button
-                type="button"
-                onClick={handleUndo}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 shrink-0"
-                title="Undo"
-              >
-                <Undo className="w-4 h-4" />
-              </button>
-
-              {/* Redo */}
-              <button
-                type="button"
-                onClick={handleRedo}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 shrink-0"
-                title="Redo"
-              >
-                <Redo className="w-4 h-4" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 mx-0.5 shrink-0" />
-
-              {/* H1 */}
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<h1>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 font-bold text-xs shrink-0"
-                title="Heading 1"
-              >
-                <Heading1 className="w-4 h-4" />
-              </button>
-
-              {/* H2 */}
-              <button
-                type="button"
-                onClick={() => applyRichFormat('formatBlock', '<h2>')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 shrink-0"
-                title="Heading 2"
-              >
-                <Heading2 className="w-4 h-4" />
-              </button>
-
-              {/* Bold */}
-              <button
-                type="button"
-                onClick={() => applyRichFormat('bold')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 font-bold shrink-0"
-                title="Bold"
-              >
-                <Bold className="w-4 h-4" />
-              </button>
-
-              {/* Italic */}
-              <button
-                type="button"
-                onClick={() => applyRichFormat('italic')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 italic shrink-0"
-                title="Italic"
-              >
-                <Italic className="w-4 h-4" />
-              </button>
-
-              {/* Tab Indent (Dedicated mobile tool) */}
-              <button
-                type="button"
-                onClick={handleIndent}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-sky-600 dark:text-sky-400 bg-sky-500/10 shrink-0"
-                title="Tab / ย่อหน้า"
-              >
-                <Indent className="w-4 h-4" />
-              </button>
-
-              {/* List */}
-              <button
-                type="button"
-                onClick={() => applyRichFormat('insertUnorderedList')}
-                className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md text-neutral-700 dark:text-neutral-300 shrink-0"
-                title="Bullet List"
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Right Controls: Search + 3-dots Menu for All Other Tools */}
-            <div className="flex items-center gap-1 shrink-0 ml-1">
-              <button
-                type="button"
-                onClick={() => setShowSearchReplace(!showSearchReplace)}
-                className={`p-1.5 rounded-md transition-colors ${
-                  showSearchReplace
-                    ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
-                    : 'text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800'
-                }`}
-                title="Search and Replace"
               >
                 <Search className="w-4 h-4" />
               </button>
 
-              {/* 3-dots Vertical Menu Button to expand/collapse inline panel */}
-              <button
-                type="button"
-                onClick={() => setShowMoreMobileMenu(!showMoreMobileMenu)}
-                className={`p-1.5 rounded-md transition-all ${
-                  showMoreMobileMenu
-                    ? 'bg-sky-500 text-white shadow-xs'
-                    : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-800 bg-neutral-200/50 dark:bg-neutral-800/60'
-                }`}
-                title={showMoreMobileMenu ? 'ย่อแถบเครื่องมือเพิ่มเติม' : 'ขยายเครื่องมือเพิ่มเติม (Expand Tools)'}
-                aria-label="More Tools"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* MOBILE MORE TOOLS EXPANDABLE INLINE PANEL (Instead of Modal) */}
-          {showMoreMobileMenu && (
-            <div className="flex lg:hidden flex-col border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/95 dark:bg-neutral-950/95 backdrop-blur-xs p-2.5 space-y-2 select-none shadow-xs shrink-0 animate-in slide-in-from-top-1 duration-150">
-              {/* Category 1: Text Styles */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-0.5">Format:</span>
+              <div className="relative">
                 <button
                   type="button"
-                  onClick={() => applyRichFormat('strikeThrough')}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Strikethrough"
+                  onClick={() => setToolGroup(toolGroup === 'more' ? null : 'more')}
+                  title="More tools"
+                  className="p-1.5 rounded-md text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"
                 >
-                  <Strikethrough className="w-3.5 h-3.5" />
-                  <span>~~ขีดฆ่า~~</span>
+                  <MoreVertical className="w-4 h-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={handleInsertInlineCode}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 font-mono text-[11px] active:scale-95 transition-all"
-                  title="Inline Code"
-                >
-                  <Code className="w-3.5 h-3.5 text-sky-500" />
-                  <span>`Code`</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleInsertHighlight}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-amber-600 dark:text-amber-400 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Highlight"
-                >
-                  <Highlighter className="w-3.5 h-3.5 text-amber-500" />
-                  <span>==ไฮไลต์==</span>
-                </button>
-              </div>
-
-              {/* Category 2: Structure & Lists */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-0.5">Structure:</span>
-                <button
-                  type="button"
-                  onClick={() => applyRichFormat('formatBlock', '<h3>')}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Heading 3"
-                >
-                  <Heading3 className="w-3.5 h-3.5 text-sky-500" />
-                  <span>H3</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyRichFormat('formatBlock', '<blockquote>')}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Blockquote"
-                >
-                  <Quote className="w-3.5 h-3.5" />
-                  <span>Quote (&gt;)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleInsertTaskCheckbox}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Task Checkbox"
-                >
-                  <CheckSquare className="w-3.5 h-3.5 text-sky-500" />
-                  <span>Task</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyRichFormat('insertOrderedList')}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Numbered List"
-                >
-                  <ListOrdered className="w-3.5 h-3.5" />
-                  <span>1. ลิสต์เลข</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleOutdent}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Outdent"
-                >
-                  <Outdent className="w-3.5 h-3.5" />
-                  <span>ลดเยื้อง</span>
-                </button>
-              </div>
-
-              {/* Category 3: Links & Extras */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-0.5">Tools:</span>
-                <button
-                  type="button"
-                  onClick={handleInsertLink}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-semibold hover:bg-sky-500/20 active:scale-95 transition-all"
-                  title="WikiLink [[Note]]"
-                >
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span>[[WikiLink]]</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleInsertWebLink}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="Web Link"
-                >
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span>[Web Link]</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTemplateName(activeFile.name.replace(/\.md$/, ''));
-                    setTemplateDesc(`Template created from ${activeFile.name}`);
-                    setShowSaveTemplateModal(true);
-                  }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 active:scale-95 transition-all"
-                  title="Save as Template"
-                >
-                  <Bookmark className="w-3.5 h-3.5" />
-                  <span>Save Template</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowMarkdownGuide(true)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                  title="MD Guide"
-                >
-                  <HelpCircle className="w-3.5 h-3.5 text-sky-500" />
-                  <span>Guide</span>
-                </button>
-                {onOpenInspector && (
-                  <button
-                    type="button"
-                    onClick={onOpenInspector}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-medium hover:border-sky-500 active:scale-95 transition-all"
-                    title="Document Info"
-                  >
-                    <Sliders className="w-3.5 h-3.5 text-sky-500" />
-                    <span>Info</span>
-                  </button>
+                {toolGroup === 'more' && (
+                  <div className="absolute right-0 top-full z-40 mt-1 w-56 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-1.5 shadow-xl">
+                    {toolGroups.more.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        title={item.title}
+                        onClick={() => {
+                          item.action();
+                          setToolGroup(null);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-left text-xs text-neutral-700 dark:text-neutral-200 hover:bg-sky-500 hover:text-white transition-colors"
+                      >
+                        <span className="opacity-70">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setShowToolbar(false)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-500 text-xs font-medium hover:border-neutral-400 active:scale-95 transition-all"
-                  title="Hide Toolbar"
-                >
-                  <EyeOff className="w-3.5 h-3.5" />
-                  <span>Hide</span>
-                </button>
               </div>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
-
-      {/* Floating Mini Restore Button when Toolbar is Hidden */}
       {!showToolbar && (
         <div className="absolute top-2 right-4 z-20 flex items-center gap-1.5 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-xl px-2.5 py-1 shadow-md select-none">
           <span className="text-[11px] font-mono text-neutral-500">Markdown Active</span>
@@ -3126,7 +2712,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
               ['Inline code', () => handleInsertInlineCode()],
               ['Bullet list', () => applyRichFormat('insertUnorderedList')],
               ['Numbered list', () => applyRichFormat('insertOrderedList')],
-              ['Quote', () => applyRichFormat('formatBlock', 'blockquote')],
+              ['Quote', () => applyRichFormat('formatBlock', '<blockquote>')],
               ['Task checkbox', () => handleInsertTaskCheckbox()],
               ['Wiki link', () => handleInsertLink()],
               ['Web link', () => handleInsertWebLink()],

@@ -106,6 +106,14 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onToggleCollapse }) 
 
   // Model selection, Conciseness, Context Limits & @file Focused Notes
   const [selectedModel, setSelectedModel] = useState<string>('gemini-3.5-flash');
+
+  // Keep chat on the model chosen in AI Models settings once providers finish loading.
+  useEffect(() => {
+    const preferred = aiProviders.find((p) => p.isDefault) || aiProviders.find((p) => p.isConnected) || aiProviders[0];
+    if (preferred?.defaultModel && !preferred.availableModels?.includes(selectedModel)) {
+      setSelectedModel(preferred.defaultModel);
+    }
+  }, [aiProviders]);
   const [conciseness, setConciseness] = useState<ResponseConciseness>('balanced');
   const [focusedFileIds, setFocusedFileIds] = useState<string[]>([]);
 

@@ -21,6 +21,7 @@ import {
   Edit2,
   Check,
   History,
+  MoreVertical,
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { StorageLocationPicker } from './StorageLocationPicker';
@@ -33,6 +34,7 @@ interface TopBarProps {
   onOpenSettings: () => void;
   onOpenTrash: () => void;
   onOpenWorkspaceSheet?: () => void;
+  onOpenMore?: () => void;
   isLeftSidebarOpen?: boolean;
   onToggleLeftSidebar?: () => void;
   isRightSidebarOpen?: boolean;
@@ -45,6 +47,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onOpenSettings,
   onOpenTrash,
   onOpenWorkspaceSheet,
+  onOpenMore,
   isLeftSidebarOpen = true,
   onToggleLeftSidebar,
   isRightSidebarOpen = true,
@@ -414,6 +417,16 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <Settings className="w-4 h-4" />
         </button>
+
+        {onOpenMore && (
+          <button
+            onClick={onOpenMore}
+            className="lg:hidden p-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors"
+            title="More"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Language Switcher */}
         <button

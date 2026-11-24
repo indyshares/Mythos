@@ -102,6 +102,13 @@ export const MobileAIView: React.FC<MobileAIViewProps> = ({ onOpenFile }) => {
 
   // Model & Conciseness & Focused Files
   const [selectedModel, setSelectedModel] = useState<string>('gemini-3.5-flash');
+
+  useEffect(() => {
+    const preferred = aiProviders.find((p) => p.isDefault) || aiProviders.find((p) => p.isConnected) || aiProviders[0];
+    if (preferred?.defaultModel && !preferred.availableModels?.includes(selectedModel)) {
+      setSelectedModel(preferred.defaultModel);
+    }
+  }, [aiProviders]);
   const [conciseness, setConciseness] = useState<ResponseConciseness>('balanced');
   const [focusedFileIds, setFocusedFileIds] = useState<string[]>([]);
 
