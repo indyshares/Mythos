@@ -715,6 +715,23 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
     formatInlineMarkdownInBlock(block);
   };
 
+  // Mobile IMEs commit characters via input/composition events instead of
+  // keydown, so `# ` never reaches the desktop auto-format branch. Apply the
+  // same block conversion on input for paragraphs only (never strip real headings).
+  const handleRichEditorInput = () => {
+    syncRichTextToMarkdown();
+    const sel = window.getSelection();
+    const node = sel?.anchorNode;
+    const element =
+      node?.nodeType === Node.ELEMENT_NODE
+        ? (node as HTMLElement)
+        : node?.parentElement || null;
+    const block = element?.closest('p, div') as HTMLElement | null;
+    if (!block || !richEditorRef.current?.contains(block)) return;
+    const text = block.textContent || '';
+    if (/^(#{1,4}|>)[\s\u00A0]+/.test(text)) cleanupInactiveBlock(block);
+  };
+
   // Detect when user moves cursor/selection to another block or line
   const checkActiveBlockChange = () => {
     const sel = window.getSelection();
@@ -2368,7 +2385,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ onOpenInspector 
               ref={richEditorRef}
               contentEditable
               suppressContentEditableWarning
-              onInput={syncRichTextToMarkdown}
+              onInput={handleRichEditorInput}
+              onCompositionEnd={handleRichEditorInput}
               onKeyDown={handleRichEditorKeyDown}
               onKeyUp={handleRichEditorKeyUp}
               onMouseDown={handleRichEditorMouseDown}

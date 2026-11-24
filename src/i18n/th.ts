@@ -225,4 +225,15 @@ export const th: Record<TranslationKey, string> = {
   'alerts.zipFailed': 'ไม่สามารถสร้างไฟล์ ZIP ได้',
   'alerts.saveTemplateNotice': 'บันทึกเทมเพลตแล้ว',
   'alerts.deleteProviderConfirm': 'ลบผู้ให้บริการ AI นี้หรือไม่?',
+
+  'onboarding.title': 'สร้าง Vault ของคุณ',
+  'onboarding.subtitle': 'Vault คือที่เก็บโน้ต โฟลเดอร์ และพื้นที่ทำงาน AI สร้างอันแรกเพื่อเริ่มเขียน',
+  'onboarding.nameLabel': 'ชื่อ Vault',
+  'onboarding.descLabel': 'คำอธิบาย (ไม่บังคับ)',
+  'onboarding.create': 'สร้าง Vault',
+  'onboarding.creating': 'กำลังสร้าง...',
+  'onboarding.error': 'สร้าง Vault ไม่สำเร็จ ตรวจสอบสิทธิ์การเข้าถึงไฟล์แล้วลองใหม่',
+  'onboarding.storageHint': 'บนแอปที่ติดตั้ง คุณสามารถเลือกตำแหน่งเก็บไฟล์ของ Vault ได้',
+  'onboarding.welcomeTitle': 'Vault พร้อมแล้ว',
+  'onboarding.welcomeBody': 'โน้ตถูกเก็บเป็นไฟล์ Markdown จริง เปิดได้กับโปรแกรมแก้ไขทั่วไป',
 };

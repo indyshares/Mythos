@@ -165,6 +165,7 @@ interface WorkspaceContextType {
   navigateInternalLink: (linkTarget: string) => void;
 
   // Native storage location
+  nativeHydrated: boolean;
   storageRootLabel: string;
   refreshStorageRoot: () => void;
 
@@ -191,13 +192,17 @@ const STORAGE_KEYS = {
   CUSTOM_TEMPLATES: 'mythos_custom_templates',
   TEMPLATE_CATEGORIES: 'mythos_template_categories',
   DB_CONFIG: 'mythos_db_config_v2',
+  NATIVE_WORKSPACE_INDEX: 'mythos_native_workspace_index',
   SECURE_PREFIX: 'mythos_secure_',
 };
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Load initial or local storage
   const [workspaces, setWorkspaces] = useState<Workspace[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.WORKSPACES);
+    const key = nativeStorageEnabled()
+      ? STORAGE_KEYS.NATIVE_WORKSPACE_INDEX
+      : STORAGE_KEYS.WORKSPACES;
+    const saved = localStorage.getItem(key) || localStorage.getItem(STORAGE_KEYS.WORKSPACES);
     return saved ? JSON.parse(saved) : INITIAL_WORKSPACES;
   });
 
@@ -465,6 +470,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     if (!nativeStorageEnabled()) {
       localStorage.setItem(STORAGE_KEYS.WORKSPACES, JSON.stringify(workspaces));
+    } else {
+      localStorage.setItem(STORAGE_KEYS.NATIVE_WORKSPACE_INDEX, JSON.stringify(workspaces));
     }
   }, [workspaces]);
 
@@ -1714,6 +1721,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     getOutgoingLinks,
     exportWorkspaceAsMarkdownZip,
     navigateInternalLink,
+    nativeHydrated,
     storageRootLabel: getStorageRoot().label,
     refreshStorageRoot,
     language,

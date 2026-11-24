@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { WorkspaceGate } from './components/WorkspaceGate';
 import { TopBar } from './components/TopBar';
 import { FileExplorer } from './components/FileExplorer';
 import { TabsBar } from './components/TabsBar';
@@ -264,7 +265,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <WorkspaceProvider>
-        <WorkspaceApp />
+        <WorkspaceGate>
+          <WorkspaceApp />
+        </WorkspaceGate>
       </WorkspaceProvider>
     </ThemeProvider>
   );

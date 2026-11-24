@@ -216,17 +216,57 @@ async function removeRel(rel: string): Promise<void> {
 }
 
 /** Create root on first launch and request file permission on Android. */
-export async function ensureNativeRoot(): Promise<void> {
-  await mkdirRel('');
-  if (!isTauri()) {
-    const { Filesystem } = await capacitorDir();
-    try {
-      await Filesystem.requestPermissions();
-    } catch {
-      // Permission may already be granted.
-    }
-    await mkdirRel('');
+let lastStorageError: string | null = null;
+export function getStorageAccessError(): string | null {
+  return lastStorageError;
+}
+
+const PROBE_FILE = '.mythos_access_probe';
+
+async function probeRoot(): Promise<boolean> {
+  try {
+    await writeTextRel(PROBE_FILE, 'ok');
+    const value = await readTextRel(PROBE_FILE);
+    await removeRel(PROBE_FILE);
+    return value === 'ok';
+  } catch {
+    return false;
   }
+}
+
+/**
+ * Ask for file access (Android) and verify the chosen root is actually usable.
+ * On Android 13+ Capacitor auto-grants legacy storage, so a real read/write
+ * probe is the only reliable check. Falls back to app-private storage.
+ */
+export async function ensureNativeRoot(): Promise<void> {
+  if (isTauri()) {
+    await mkdirRel('');
+    lastStorageError = null;
+    return;
+  }
+
+  const { Filesystem } = await capacitorDir();
+  try {
+    await Filesystem.requestPermissions();
+  } catch (err) {
+    console.warn('Storage permission request failed:', err);
+  }
+
+  if (await probeRoot()) {
+    lastStorageError = null;
+    return;
+  }
+
+  // Public Documents is often unwritable under Android scoped storage.
+  setStorageRoot({ directory: 'data', path: ROOT_NAME, label: `App private/${ROOT_NAME}` });
+  cachedBase = null;
+  if (await probeRoot()) {
+    lastStorageError = 'Public storage unavailable — using app-private storage.';
+    return;
+  }
+  lastStorageError = 'Storage access denied. Check app permissions in system settings.';
+  throw new Error(lastStorageError);
 }
 
 /* ------------------------------- Read -------------------------------- */

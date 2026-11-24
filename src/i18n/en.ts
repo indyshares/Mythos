@@ -223,6 +223,17 @@ export const en = {
   'alerts.zipFailed': 'Failed to generate ZIP file.',
   'alerts.saveTemplateNotice': 'Template saved.',
   'alerts.deleteProviderConfirm': 'Delete this AI provider?',
+
+  'onboarding.title': 'Create your vault',
+  'onboarding.subtitle': 'A vault holds your notes, folders and AI workspace. Create one to start writing.',
+  'onboarding.nameLabel': 'Vault name',
+  'onboarding.descLabel': 'Description (optional)',
+  'onboarding.create': 'Create vault',
+  'onboarding.creating': 'Creating...',
+  'onboarding.error': 'Could not create the vault. Check storage permissions and try again.',
+  'onboarding.storageHint': 'On a native app you can choose where the vault files are stored.',
+  'onboarding.welcomeTitle': 'Your vault is ready',
+  'onboarding.welcomeBody': 'Notes are stored as real Markdown files you can open in any editor.',
 } as const;
 
 export type TranslationKey = keyof typeof en;
