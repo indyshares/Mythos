@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Folder as FolderIcon,
   FolderOpen,
@@ -29,6 +29,8 @@ interface FileExplorerProps {
   onOpenFile?: () => void;
   onToggleCollapse?: () => void;
 }
+
+type ContextItem = { id: string; type: 'file' | 'folder'; name: string; parentId: string | null };
 
 export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, onOpenFile, onToggleCollapse }) => {
   const {
@@ -73,11 +75,39 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
   const [isRootCreateMenuOpen, setIsRootCreateMenuOpen] = useState(false);
 
   // Context Menu
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    item: { id: string; type: 'file' | 'folder'; name: string; parentId: string | null };
-  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; item: ContextItem } | null>(null);
+
+  // Mobile long-press opens the same menu as desktop right-click.
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressClickRef = useRef(false);
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const startLongPress = (e: React.TouchEvent, item: ContextItem) => {
+    if (isTauri()) return;
+    clearLongPress();
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      suppressClickRef.current = true;
+      setContextMenu({ x, y, item });
+    }, 500);
+  };
+
+  const cancelLongPress = () => clearLongPress();
+
+  const consumeSuppressedClick = () => {
+    if (!suppressClickRef.current) return false;
+    suppressClickRef.current = false;
+    return true;
+  };
 
   // Drag and drop state
   const [draggedItem, setDraggedItem] = useState<{
@@ -248,9 +278,16 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
                     : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
                 } ${isSelected ? 'bg-sky-50 dark:bg-sky-950/30' : ''}`}
                 style={{ paddingLeft: `${depth * 12 + 8}px` }}
-                onClick={() => toggleFolder(folder.id)}
+                onClick={() => {
+                  if (consumeSuppressedClick()) return;
+                  toggleFolder(folder.id);
+                }}
+                onTouchStart={(e) => startLongPress(e, { id: folder.id, type: 'folder', name: folder.name, parentId: folder.parentId })}
+                onTouchMove={cancelLongPress}
+                onTouchEnd={cancelLongPress}
+                onTouchCancel={cancelLongPress}
                 onContextMenu={(e) => {
-                  if (!isTauri()) return; // mobile has no right-click
+                  if (!isTauri()) return; // mobile uses long-press instead
                   e.preventDefault();
                   setContextMenu({
                     x: e.clientX,
@@ -382,9 +419,14 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onSelectTemplate, on
               draggable
               onDragStart={(e) => handleDragStart(e, file.id, 'file')}
               onClick={() => {
+                if (consumeSuppressedClick()) return;
                 openFileInTab(file.id);
                 onOpenFile?.();
               }}
+              onTouchStart={(e) => startLongPress(e, { id: file.id, type: 'file', name: file.name, parentId: file.parentId })}
+              onTouchMove={cancelLongPress}
+              onTouchEnd={cancelLongPress}
+              onTouchCancel={cancelLongPress}
               onContextMenu={(e) => {
                 if (!isTauri()) return;
                 e.preventDefault();
